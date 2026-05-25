@@ -31,18 +31,17 @@ The 44 split into two slices:
 
 ## Systems compared
 
-Four systems are evaluated on the same 44-fact corpus, with the same
-question text and the same scoring rules. Three of the four are
+Three systems are evaluated on the same 44-fact corpus, with the same
+question text and the same scoring rules. Two of the three are
 baselines:
 
 | System | Description |
 |---|---|
-| **Hippocampus** | The retrieval engine under evaluation, in its canonical configuration (`bridge-config=full`, `m1-config=baseline`). Source commit: `a00e8f8` of the production repository. |
-| **Hippocampus + OPEN-6** | Same engine, with the OPEN-6 query-role expansion enabled (`--open6=enabled`). Source commit: `06a4212`. OPEN-6 closes one additional failure category by appending the canonical `fact_type` token to the lexical recall query when the query parser detects a known role pattern. See METHODOLOGY.md. |
+| **Hippocampus** | The retrieval engine under evaluation, in its headline configuration (`bridge-config=full`, `m1-config=baseline`, role-token expansion enabled). Source commit: `06a4212` of the production repository. The earlier `a00e8f8` baseline artifact is retained for auditability, not treated as a separate public system. |
 | **MiniLM-filtered(2024)** | Dense-vector retrieval using `sentence-transformers/all-MiniLM-L6-v2` embeddings, with a date-aware filter that scores `(2024)`-marked passages higher than older ones. This is the strongest off-the-shelf baseline we found for this corpus. |
 | **BM25-TFIDF** | Classical lexical-overlap retrieval. Included as a non-neural baseline so the dense-retrieval contribution can be isolated from the lexical-overlap contribution. |
 
-The two MiniLM and BM25 baselines were both invoked from the same bench
+The MiniLM and BM25 baselines were both invoked from the same bench
 harness that ran Hippocampus, against the same 44-fact question list,
 so the comparison is apples-to-apples on the input side.
 
@@ -67,11 +66,12 @@ Hippocampus is to return *just the answer-bearing unit*, not the whole
 article — which is why the token cost differs by an order of
 magnitude.
 
-For Hippocampus on the canonical run, every fact has
-`answer_correct == contradiction_free` (the engine either returns the
-correct atomic unit or returns the wrong unit; it doesn't return both).
-The two metrics diverge on the baselines, where the document-level
-retrieval often surfaces both values from the same article.
+For Hippocampus, the headline metric is `contradiction_free`. The
+earlier baseline artifact has `answer_correct == contradiction_free`
+on every fact; the headline artifact records one case where the
+answer is present but a stale contradicting value is also retrieved.
+That distinction is why this repo reports both fields instead of raw
+accuracy alone.
 
 ## Per-row JSONL schema
 
@@ -120,7 +120,7 @@ Every row in `results/*.jsonl` follows this schema:
 
 Two fields in the schema deserve called-out honesty:
 
-1. **`prediction` is always `null`.** The canonical scoring artifacts
+1. **`prediction` is always `null`.** The scoring artifacts
    (the source JSONLs that this repository's `results/*.jsonl` are
    derived from) record the verdict — was the answer correct?
    contradiction-free? — but they do **not** record the raw text
@@ -162,7 +162,7 @@ contradiction-free *and* low tokens simultaneously.
 
 ## How `summary.json` is built
 
-`scripts/score.ts --write-summary` reads all four JSONLs in `results/`,
+`scripts/score.ts --write-summary` reads the public JSONLs in `results/`,
 computes the per-system / per-slice statistics, and writes
 `results/summary.json`. The "single source of truth" property follows:
 every number in `summary.json` is the output of one specific

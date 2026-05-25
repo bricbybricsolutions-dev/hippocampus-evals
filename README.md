@@ -11,7 +11,7 @@
 
   <br>
 
-  **[Read the full write-up →](https://your-blog-post-link)** &nbsp;·&nbsp; **[Contact us](https://www.linkedin.com/in/anees-alsajir/)**
+  **<a href="https://www.linkedin.com/in/anees-alsajir/" target="_blank" rel="noopener noreferrer">Contact us</a>**
 
 </div>
 
@@ -51,7 +51,8 @@ hippocampus-evals/
 ├── data/
 │   └── wikipedia-44/        44-fact benchmark, frozen 2024-12-31 (CC BY-SA 4.0)
 ├── results/
-│   ├── hippocampus.jsonl    Per-fact results — commit hash, tokens, CF, failure category
+│   ├── hippocampus.jsonl    Headline Hippocampus results — commit hash, tokens, CF
+│   ├── hippocampus-baseline.jsonl
 │   ├── minilm-filtered.jsonl
 │   ├── bm25.jsonl
 │   └── summary.json         Headline numbers
@@ -59,18 +60,18 @@ hippocampus-evals/
 │   └── score.ts             Reproduces summary.json from any result JSONL
 ├── BENCHMARK.md             Dataset description and scoring definition
 ├── METHODOLOGY.md           Pre-committed falsifiers in plain English
-├── FAILURES.md              The 8 facts we still get wrong, with root causes
+├── FAILURES.md              The 7 facts we still get wrong, with root causes
 ├── LIMITATIONS.md           What we are not claiming
 └── REPRODUCE.md             Full reproduction instructions
 ```
 
-## The 8 facts we still get wrong
+## The 7 facts we still get wrong
 
 We publish these because knowing which bucket a failure belongs to is more useful than a cleaner number.
 
 **4 fail on every system we tested** — Hippocampus, MiniLM-filtered, MiniLM-unfiltered, and BM25. Entity-slot queries where the question names a country or institution but the correct answer is indexed under a person's name. Zero lexical or semantic overlap on the entity. Not our failure specifically — these are at the boundary of what retrieval systems handle.
 
-**4 are Hippocampus-specific** — two birth-place queries where the pipeline short-circuits before the role hint reaches seeding (fix is known and sequenced), one honorific query where the schema doesn't have the right atom indexed (corpus enrichment, not retrieval), and one succession query where the phrasing contains no succession verb.
+**3 are Hippocampus-specific** — one succession query where the phrasing contains no succession verb, one list-tail citizenship query where the schema doesn't have the right atom indexed, and one employee-count regression from a role-expansion ranking shift.
 
 Full analysis with per-fact root causes: [`FAILURES.md`](FAILURES.md)
 
@@ -99,5 +100,5 @@ Dataset (`data/wikipedia-44/`): [CC BY-SA 4.0](data/wikipedia-44/LICENSE) — de
 ---
 
 <div align="center">
-  <sub>Built by <a href="https://github.com/bricbybricsolutions-dev">BricbyBric</a> · Pre-committed falsifiers on every claim · <a href="https://www.linkedin.com/in/anees-alsajir/">Get in touch</a></sub>
+  <sub>Built by <a href="https://github.com/bricbybricsolutions-dev">BricbyBric</a> · Pre-committed falsifiers on every claim · <a href="https://www.linkedin.com/in/anees-alsajir/" target="_blank" rel="noopener noreferrer">Get in touch</a></sub>
 </div>

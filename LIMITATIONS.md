@@ -12,7 +12,7 @@ support tickets, legal contract clauses, product reviews, or any
 other genre of text. We have not run it on any non-English corpus.
 We have not run it on any corpus larger than 44 facts.
 
-The blog post's "10× token efficiency" claim, the "81.8%
+The blog post's "10× token efficiency" claim, the "84.09%
 contradiction-free recall" claim, and every cross-system comparison
 are claims **about Wikipedia, on this 44-fact set, at the 2024-12-31
 cutoff**. They are not claims about retrieval in general, about
@@ -27,7 +27,7 @@ verify exactly what is being claimed.
 
 ## 2. The alias map was built for this corpus
 
-The query parser used in OPEN-6 and OPEN-7 contains a deterministic
+The query parser contains a deterministic
 regex grammar that maps natural-English query vocabulary
 ("born", "succeeded", "honorific") to canonical infobox parameter
 names (`birth_place`, `successor1`, `honorific_prefix`). That regex
@@ -87,10 +87,9 @@ license as the code in this repository.
 
 ## 5. Determinism is configuration-scoped
 
-The N=10 byte-identical determinism claim applies to the **canonical
-configuration** (`bridge-config=full m1-config=baseline`) and the
-OPEN-6 configuration (`bridge-config=full m1-config=baseline
-open6=enabled`). Other configurations of the engine — in particular
+The determinism claim applies to the reported Hippocampus
+configuration (`bridge-config=full m1-config=baseline` with
+role-token expansion enabled). Other configurations of the engine — in particular
 `schemaCorpusEnriched` and the no-bridge baseline — have measurable
 within-state jitter (a single non-list-tail fact can flip between
 trials on those configurations). We are reporting numbers from the
@@ -105,8 +104,8 @@ configuration, expect it to be reported as a multi-trial mean
 ## 6. The list-tail slice is reported but is not the headline
 
 6 of the 44 facts are list-tail facts (the changed value is one entry
-in a multi-valued field). Hippocampus's canonical configuration
-scores 4/6 (66.67%) contradiction-free on this slice. We report this
+in a multi-valued field). Hippocampus scores 4/6 (66.67%)
+contradiction-free on this slice. We report this
 slice separately because:
 
 - It is a smaller-sample regime (n=6) where single-fact flips swing
@@ -116,7 +115,7 @@ slice separately because:
   scalar-field retrieval; bundling them inflates the apparent
   difficulty of the easier slice.
 
-The headline (81.8% overall, 84.2% non-list-tail) is the right
+The headline (84.09% overall, 86.84% non-list-tail) is the right
 comparison point for the blog post. The list-tail slice is the right
 comparison point if you are specifically evaluating retrieval over
 multi-valued fields.

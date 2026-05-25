@@ -22,10 +22,10 @@ benchmark is to design the scoring rule after seeing the data. By
 fixing the falsifier in advance we make that move impossible without
 visibly editing a committed file.
 
-A concrete example. The OPEN-6 change documented in the
-`Hippocampus + OPEN-6` row of the headline table was proposed by an
-analysis (§6119 of the project guide) that predicted exactly one fact
-would flip from `contradiction_free=0` to `contradiction_free=1`:
+A concrete example. The role-token expansion included in the
+headline Hippocampus run was proposed by an analysis (§6119 of the
+project guide) that predicted exactly one fact would flip from
+`contradiction_free=0` to `contradiction_free=1`:
 *João Lourenço's birth place*. The three falsifiers were:
 
 - **H1** — Lourenço-birth_place flips to `contradiction_free=1`, and
@@ -34,14 +34,14 @@ would flip from `contradiction_free=0` to `contradiction_free=1`:
 - **H2** — Non-list-tail contradiction-free rises from 32/38 to at
   least 33/38.
   *Disproof:* it stays at 32/38 or regresses.
-- **H3** — A necessity ablation that disables the OPEN-6 change makes
+- **H3** — A necessity ablation that disables the role-token expansion makes
   Lourenço-birth_place revert to `contradiction_free=0`.
   *Disproof:* it stays at 1 (meaning the mechanism wasn't the thing
   doing the work).
 
 All three passed on the actual run. We did not move any bar after
 seeing the data; the SHA of the prediction file (`882ccff` on the
-internal docs branch) predates the SHA of the OPEN-6 implementation
+internal docs branch) predates the SHA of the role-token implementation
 commit (`06a4212`).
 
 Two surprises showed up that the falsifiers did not predict, and they
@@ -55,13 +55,14 @@ that the new mechanism is *necessary* for the win. Without the
 necessity ablation, you could be claiming credit for a change that
 isn't doing what you think it's doing.
 
-For OPEN-6 the necessity ablation was H3 above: disable the role-token
-injection, re-run the same 44-fact bench, and check that the predicted
-flip reverts. The baseline run on commit `06a4212` (the `o60` JSONL
-in the production artifacts; flag absent) is byte-identical to the
-canonical `a00e8f8` run on the metrics we report. Lourenço-birth_place
-is `contradiction_free=0` in the baseline and `contradiction_free=1`
-under `--open6=enabled` on the same commit. That is the cleanest
+For the role-token expansion, the necessity ablation was H3 above:
+disable the role-token injection, re-run the same 44-fact bench, and
+check that the predicted flip reverts. The baseline run on commit
+`06a4212` (the `o60` JSONL in the production artifacts; flag absent)
+is byte-identical to the earlier `a00e8f8` run on the metrics we
+report. Lourenço-birth_place is `contradiction_free=0` in the
+baseline and `contradiction_free=1` with the role-token expansion on
+the same commit. That is the cleanest
 necessity test possible: same code, same corpus, single flag toggle,
 predicted fact flips.
 
@@ -73,15 +74,15 @@ ablate; you turn the engine on or off.
 
 ## How we handled the Shahabuddin surprise
 
-When we ran OPEN-6, a *second* fact flipped that the pre-committed
+When we ran the role-token expansion, a *second* fact flipped that the pre-committed
 falsifier did not predict: *Mohammed Shahabuddin's honorific prefix*.
-The §6119 analysis had classified this fact as "OPEN-9 territory" —
+The §6119 analysis had classified this fact as schema-expansion territory —
 the bridge attempted but found no atom in the schema cortex, which we
 thought meant a different mechanism was needed.
 
 We were wrong about the workaround pathway. Even without an atom, the
 lexical fallback found the right cell once the canonical role token
-was injected into the query string. The OPEN-6 cheap form closed
+was injected into the query string. The role-token expansion closed
 **2 of the 4** failure cases that §6125 had originally enumerated, not
 the 1 the prediction had locked in.
 
@@ -95,14 +96,14 @@ doesn't validate the prediction more than it already was validated.
 
 In the per-fact failure tagging, Shahabuddin-honorific_prefix is
 categorized as `atom-coverage-gap` (the original §6119 classification),
-not as a victory for OPEN-6 specifically. The recovery by lexical
+not as a victory for that mechanism specifically. The recovery by lexical
 fallback is documented in [`FAILURES.md`](FAILURES.md) under that fact.
 
 ## How we handled the Air_Products regression (YELLOW)
 
-OPEN-6 also flipped one fact in the *wrong* direction:
+The role-token expansion also flipped one fact in the *wrong* direction:
 *Air_Products's number of employees* went from
-`contradiction_free=1` (baseline) to `0` (OPEN-6 enabled). With
+`contradiction_free=1` (baseline) to `0` in the headline run. With
 "num_employees" appended to the query string, the ranking shifted and
 a different cell — one containing a stale value — won.
 
@@ -113,18 +114,18 @@ demonstrably **not regression-free**.
 
 The project's internal §S4 ("load-bearing vs decorative") discipline
 classifies this as **YELLOW on regression-safety, GREEN on the net
-metric**. Both colors are reported. Promotion of the OPEN-6 change
+metric**. Both colors are reported. Promotion of the role-token expansion
 into the core engine was blocked until the regression was attributed
 to a specific subsystem (the `resolveCurrentTruth` Pass-2 entity
 clustering, separately from the lexical-seed change) and a fix was
 landed. The fix is on a separate commit and is not in the
-`hippocampus-open6.jsonl` artifact in this repo — that artifact is
-the run with OPEN-6 enabled and the regression *present*. We are
+`hippocampus.jsonl` artifact in this repo — that artifact is
+the headline Hippocampus run with the regression *present*. We are
 publishing it as it was scored, not as it would score with the
 follow-up fix applied.
 
 If we were publishing the post-fix numbers we would say so. We are
-not — the headline OPEN-6 result is +1 net, with one regression
+not — the headline Hippocampus result is +1 net, with one regression
 identified and documented, and the engine fix is part of a separate
 work stream.
 
@@ -146,19 +147,12 @@ cost.
 
 ## Where the determinism claim comes from
 
-Hippocampus's canonical configuration (`bridge-config=full
-m1-config=baseline`) has been characterized at N=10 trials with the
-same code and corpus and produces byte-identical outputs across all
-10 runs. Per-fact composition is identical run-to-run: 36 facts pass
-in 10/10 runs, 8 fail in 10/10, zero facts flip. So the single-run
-numbers we report are not single-trial noise — under this
-configuration there is no within-state variance to integrate over.
-The internal documentation (§11.5.8) records the stdev=0.0000 result
-and the per-trial JSONLs.
-
-The OPEN-6 run was characterized separately at N=4 trials of each of
-baseline (`o60`) and `--open6=enabled` (`o61`) and is also
-byte-identical across runs. The same single-trial logic applies.
+The headline Hippocampus configuration has been characterized at N=4
+trials and is byte-identical across runs. The earlier baseline
+configuration was characterized at N=10 trials and was also
+byte-identical: 36 facts pass in 10/10 runs, 8 fail in 10/10, and
+zero facts flip. So the single-run numbers we report are not
+single-trial noise under the reported configurations.
 
 The MiniLM-filtered and BM25 baselines are deterministic by
 construction (no learned components evaluated at recall time, no

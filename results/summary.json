@@ -8,6 +8,39 @@
         "Hippocampus": {
           "overall": {
             "n": 44,
+            "accuracy": 0.8636363636363636,
+            "contradiction_free": 0.8409090909090909,
+            "mean_units": 1,
+            "mean_tokens": 12.181818181818182
+          },
+          "non_list_tail": {
+            "n": 38,
+            "accuracy": 0.868421052631579,
+            "contradiction_free": 0.868421052631579,
+            "mean_units": 1,
+            "mean_tokens": 12.157894736842104
+          },
+          "list_tail": {
+            "n": 6,
+            "accuracy": 0.8333333333333334,
+            "contradiction_free": 0.6666666666666666,
+            "mean_units": 1,
+            "mean_tokens": 12.333333333333334
+          }
+        }
+      },
+      "meta": {
+        "commit_hash": "06a4212246969eda978d104619e60356b7afecf8",
+        "run_timestamp": 1779643055950,
+        "config": "bridge-config=full m1-config=baseline role-token-expansion=enabled"
+      }
+    },
+    "hippocampus-baseline.jsonl": {
+      "file": "hippocampus-baseline.jsonl",
+      "systems": {
+        "Hippocampus": {
+          "overall": {
+            "n": 44,
             "accuracy": 0.8181818181818182,
             "contradiction_free": 0.8181818181818182,
             "mean_units": 1,
@@ -33,39 +66,6 @@
         "commit_hash": "a00e8f8521c75902a5aa24ee4f892518a5b48dd4",
         "run_timestamp": 1779577299293,
         "config": "bridge-config=full m1-config=baseline (default)"
-      }
-    },
-    "hippocampus-open6.jsonl": {
-      "file": "hippocampus-open6.jsonl",
-      "systems": {
-        "Hippocampus": {
-          "overall": {
-            "n": 44,
-            "accuracy": 0.8636363636363636,
-            "contradiction_free": 0.8409090909090909,
-            "mean_units": 1,
-            "mean_tokens": 12.181818181818182
-          },
-          "non_list_tail": {
-            "n": 38,
-            "accuracy": 0.868421052631579,
-            "contradiction_free": 0.868421052631579,
-            "mean_units": 1,
-            "mean_tokens": 12.157894736842104
-          },
-          "list_tail": {
-            "n": 6,
-            "accuracy": 0.8333333333333334,
-            "contradiction_free": 0.6666666666666666,
-            "mean_units": 1,
-            "mean_tokens": 12.333333333333334
-          }
-        }
-      },
-      "meta": {
-        "commit_hash": "06a4212246969eda978d104619e60356b7afecf8",
-        "run_timestamp": 1779643055950,
-        "config": "bridge-config=full m1-config=baseline open6=enabled"
       }
     },
     "minilm-filtered.jsonl": {
@@ -136,7 +136,17 @@
     }
   },
   "headline": {
-    "hippocampus_canonical": {
+    "hippocampus": {
+      "overall_cf": "37/44",
+      "overall_cf_pct": 84.09,
+      "non_list_tail_cf": "33/38",
+      "non_list_tail_cf_pct": 86.84,
+      "list_tail_cf": "4/6",
+      "list_tail_cf_pct": 66.67,
+      "mean_tokens": 12.1818,
+      "commit_hash": "06a4212246969eda978d104619e60356b7afecf8"
+    },
+    "hippocampus_baseline": {
       "overall_cf": "36/44",
       "overall_cf_pct": 81.82,
       "non_list_tail_cf": "32/38",
@@ -145,14 +155,6 @@
       "list_tail_cf_pct": 66.67,
       "mean_tokens": 11.5455,
       "commit_hash": "a00e8f8521c75902a5aa24ee4f892518a5b48dd4"
-    },
-    "hippocampus_open6": {
-      "overall_cf": "37/44",
-      "overall_cf_pct": 84.09,
-      "non_list_tail_cf": "33/38",
-      "non_list_tail_cf_pct": 86.84,
-      "mean_tokens": 12.1818,
-      "commit_hash": "06a4212246969eda978d104619e60356b7afecf8"
     },
     "minilm_filtered_2024": {
       "overall_cf": "33/44",
@@ -166,14 +168,14 @@
     }
   },
   "token_efficiency": {
-    "minilm_filtered_over_hippocampus": 10.5217,
-    "bm25_over_hippocampus": 42.8957,
-    "minilm_filtered_over_hippocampus_open6": 9.972
+    "minilm_filtered_over_hippocampus": 9.972,
+    "bm25_over_hippocampus": 40.6549,
+    "minilm_filtered_over_hippocampus_baseline": 10.5217
   },
   "failure_categories": {
     "lexical-seeding-gap": "Query word does not share a token with the canonical fact_type, so the lexical encoder never seeds the right cell. Example: 'where was X born' vs cell content prefix 'X birth place...'.",
     "atom-coverage-gap": "Bridge fires correctly (container + role parsed) but no atom is indexed in the schema cortex for (container, role). Example: Shahabuddin-honorific_prefix.",
-    "entity-slot-gap": "Country/office ↔ office-holder structural mismatch. Query names a country; cell is keyed on the office-holder; lexical encoder has no country-keyed seed. OPEN-7 territory.",
+    "entity-slot-gap": "Country/office ↔ office-holder structural mismatch. Query names a country; cell is keyed on the office-holder; lexical encoder has no country-keyed seed. Atom-bridge retrieval territory.",
     "out-of-scope": "Fact fails on every system tested (Hippocampus, BM25-TFIDF, MiniLM-unfiltered, MiniLM-filtered(2024)). The question is structurally unanswerable from the 44-fact corpus at the cutoff date 2024-12-31; this is not a Hippocampus-specific failure."
   }
 }

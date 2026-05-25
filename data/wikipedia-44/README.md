@@ -4,9 +4,9 @@
 fact records both the **current** value of a property (as of the data
 cutoff 2024-12-31) and the **prior** value it replaced, along with the
 Wikipedia revision IDs that bracket the change. This is the dataset that
-the headline `hippocampus.jsonl` / `hippocampus-open6.jsonl` /
-`minilm-filtered.jsonl` / `bm25.jsonl` results in `../../results/` were
-evaluated against.
+the `hippocampus.jsonl`, `hippocampus-baseline.jsonl`,
+`minilm-filtered.jsonl`, and `bm25.jsonl` results in `../../results/`
+were evaluated against.
 
 ## Files
 

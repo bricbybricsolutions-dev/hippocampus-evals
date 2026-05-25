@@ -25,14 +25,14 @@ You do **not** need:
 ## Minimal reproduction (from clean clone)
 
 ```bash
-git clone https://github.com/<org>/hippocampus-evals.git
+git clone https://github.com/bricbybricsolutions-dev/hippocampus-evals.git
 cd hippocampus-evals
 npm install
 npx tsx scripts/score.ts results/hippocampus.jsonl
 ```
 
 The output will be a JSON dump containing the metrics for every
-system in that JSONL. The Hippocampus canonical block must match the
+system in that JSONL. The Hippocampus block must match the
 values in the verification gate below.
 
 ## Verification gate
@@ -54,42 +54,43 @@ Expected fields in the printed output for `Hippocampus`:
 {
   "overall": {
     "n": 44,
-    "contradiction_free": 0.8181818181818182,    // 36/44 = 81.82%
-    "mean_tokens": 11.545454545454545,            // ≈ 11.55
+    "contradiction_free": 0.8409090909090909,    // 37/44 = 84.09%
+    "mean_tokens": 12.181818181818182,            // ≈ 12.18
     "mean_units": 1,
-    "accuracy": 0.8181818181818182                // 36/44 — equal to CF for Hippocampus
+    "accuracy": 0.8636363636363636                // 38/44 raw answer correctness
   },
   "non_list_tail": {
     "n": 38,
-    "contradiction_free": 0.8421052631578947,    // 32/38 = 84.21%
-    "mean_tokens": 12
+    "contradiction_free": 0.868421052631579,     // 33/38 = 86.84%
+    "mean_tokens": 12.157894736842104
   },
   "list_tail": {
     "n": 6,
     "contradiction_free": 0.6666666666666666,    // 4/6 = 66.67%
-    "mean_tokens": 8.666666666666666
+    "mean_tokens": 12.333333333333334
   }
 }
 ```
 
-### From `results/hippocampus-open6.jsonl`
+### From `results/hippocampus-baseline.jsonl`
 
 ```
-$ npx tsx scripts/score.ts results/hippocampus-open6.jsonl
+$ npx tsx scripts/score.ts results/hippocampus-baseline.jsonl
 ```
 
-Expected fields for `Hippocampus`:
+This earlier baseline artifact is retained for auditability. Expected
+fields for `Hippocampus`:
 
 ```jsonc
 {
   "overall": {
     "n": 44,
-    "contradiction_free": 0.8409090909090909,    // 37/44 = 84.09%
-    "mean_tokens": 12.181818181818182             // ≈ 12.18
+    "contradiction_free": 0.8181818181818182,    // 36/44 = 81.82%
+    "mean_tokens": 11.545454545454545             // ≈ 11.55
   },
   "non_list_tail": {
     "n": 38,
-    "contradiction_free": 0.868421052631579      // 33/38 = 86.84%
+    "contradiction_free": 0.8421052631578947     // 32/38 = 84.21%
   }
 }
 ```
@@ -118,9 +119,9 @@ This reads all four `results/*.jsonl` files and rewrites
 `results/summary.json` in place. The resulting `summary.json` should
 be byte-identical to the one already committed to the repository
 (modulo trailing newline conventions on Windows vs POSIX). The
-`headline.hippocampus_canonical.overall_cf` field must be exactly
-`"36/44"`; the `token_efficiency.minilm_filtered_over_hippocampus`
-field must be `10.5217`.
+`headline.hippocampus.overall_cf` field must be exactly `"37/44"`;
+the `token_efficiency.minilm_filtered_over_hippocampus` field must
+be `9.972`.
 
 ## What is *not* reproducible from this repository alone
 
@@ -136,21 +137,18 @@ production engine and are not reproducible from this repository:
   to verify the determinism claim, they would need engine access and
   the ability to run 10 trials. We document this honestly here rather
   than imply that determinism is verifiable from this repo.
-- **The necessity ablation for OPEN-6.** The ablation involved
-  running the engine with the `--open6=enabled` flag off (the
-  baseline `o60` run) and comparing per-fact verdicts. Both
-  `o60` and the canonical `a00e8f8` artifact are byte-identical on
-  the metrics we report, so the published `results/hippocampus.jsonl`
-  serves as the ablation baseline. The user of this repository can
-  verify that disabling the OPEN-6 mechanism (i.e., loading
-  `hippocampus.jsonl` instead of `hippocampus-open6.jsonl`) causes
-  Lourenço-birth_place to revert to `contradiction_free=0`. That
-  verification *is* possible without engine access:
+- **The necessity ablation for the role-token expansion.** The
+  ablation involved running the engine with the role-token expansion
+  off and comparing per-fact verdicts. The published
+  `results/hippocampus-baseline.jsonl` serves as the ablation baseline. The
+  user of this repository can verify that disabling the mechanism
+  causes Lourenço-birth_place to revert to `contradiction_free=0`.
+  That verification *is* possible without engine access:
 
   ```bash
   # Find Lourenço in both files
+  grep "João_Lourenço-birth_place" results/hippocampus-baseline.jsonl
   grep "João_Lourenço-birth_place" results/hippocampus.jsonl
-  grep "João_Lourenço-birth_place" results/hippocampus-open6.jsonl
   ```
 
   The first row will show `"contradiction_free": 0`; the second will

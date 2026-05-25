@@ -1,184 +1,123 @@
 # FAILURES.md
 
-The 8 facts where Hippocampus returns a non-contradiction-free answer,
-named individually, categorized into 4 buckets, and with the
-derivation traced back to the source artifacts.
+The 7 facts where the headline Hippocampus run returns a
+non-contradiction-free answer, named individually, categorized, and
+traced back to the source artifacts.
 
 This document exists because publishing a failure analysis is the
 honest version of publishing the headline. Most retrieval papers
 report aggregate accuracy and leave the failure cases as an exercise
-for the skeptic. We will not — the 8 are listed below by name, and
-fixing any one of them is a known piece of work with a known cost.
+for the skeptic. We do not. The failed rows are listed below by name,
+and fixing any one of them is a known piece of work with a known cost.
 
-## The 8 Hippocampus-failing facts (canonical run, `a00e8f8`)
+## The 7 Hippocampus-failing facts
 
 These are the facts where `contradiction_free=0` in
-`results/hippocampus.jsonl`. The set is **deterministic** — across
-N=10 trials on the canonical configuration the same 8 facts fail
-every run, with zero facts flipping between runs (PROJECT-GUIDE.md
-§11.5.8 in the production repo, stdev=0.0000).
+`results/hippocampus.jsonl`, the headline Hippocampus artifact.
 
-| # | Fact ID                                  | Failure category       | Status under OPEN-6 |
-|---|------------------------------------------|------------------------|---------------------|
-| 1 | `Abdelmadjid_Tebboune-primeminister`     | `out-of-scope`         | Still fails (every system fails) |
-| 2 | `Alexander_Van_der_Bellen-citizenship`   | `atom-coverage-gap`    | Still fails         |
-| 3 | `Bajram_Begaj-predecessor`               | `lexical-seeding-gap`  | Still fails         |
-| 4 | `Hamad_bin_Isa_Al_Khalifa-regent`        | `out-of-scope`         | Still fails (every system fails) |
-| 5 | `Javier_Milei-office`                    | `out-of-scope`         | Still fails (every system fails) |
-| 6 | `João_Lourenço-birth_place`              | `lexical-seeding-gap`  | **Closed by OPEN-6** |
-| 7 | `Mohammed_Shahabuddin-honorific_prefix`  | `atom-coverage-gap`    | **Closed by OPEN-6** (unpredicted bonus — see METHODOLOGY.md) |
-| 8 | `Vahagn_Khachaturyan-successor1`         | `out-of-scope`         | Still fails (every system fails) |
+| # | Fact ID                                  | Failure category       | Notes |
+|---|------------------------------------------|------------------------|-------|
+| 1 | `Abdelmadjid_Tebboune-primeminister`     | `out-of-scope`         | Answer is present, but not contradiction-free |
+| 2 | `Air_Products-num_employees`             | role-expansion regression | Ranking shifted to a stale employee-count cell |
+| 3 | `Alexander_Van_der_Bellen-citizenship`   | `atom-coverage-gap`    | List-tail temporal citizenship fact |
+| 4 | `Bajram_Begaj-predecessor`               | `lexical-seeding-gap`  | Succession phrasing misses the indexed role token |
+| 5 | `Hamad_bin_Isa_Al_Khalifa-regent`        | `out-of-scope`         | Every tested system fails contradiction-free |
+| 6 | `Javier_Milei-office`                    | `out-of-scope`         | Every tested system fails contradiction-free |
+| 7 | `Vahagn_Khachaturyan-successor1`         | `out-of-scope`         | Every tested system fails contradiction-free |
 
-After OPEN-6: 6 still fail (2 closed). The 4 `out-of-scope` failures
-remain — they are not Hippocampus-specific.
+The earlier baseline artifact, `results/hippocampus-baseline.jsonl`, had 8
+contradiction-free failures. The role-token expansion closed
+`João_Lourenço-birth_place` and
+`Mohammed_Shahabuddin-honorific_prefix`, but introduced the
+`Air_Products-num_employees` regression. Net effect: 37/44
+contradiction-free instead of 36/44.
 
-## The four failure categories
+## Failure categories
 
-### `lexical-seeding-gap` (2 facts)
+### `lexical-seeding-gap` (1 headline fact)
 
 The query's English vocabulary does not share any token with the
 canonical infobox parameter name that Hippocampus stores in the cell.
 The lexical encoder is token-based; if no token overlaps, no cell is
-seeded, and downstream temporal-disambiguation logic cannot help —
-the right cell was never reached.
+seeded, and downstream temporal-disambiguation logic cannot help.
 
-> **What fixing it costs.** This is exactly what OPEN-6 fixes for one
-> class of these (the `birth_place` family — the query says "born",
-> the cell says "birth_place"). The fix is a small deterministic
-> regex that maps known English vocabulary to canonical fact_type
-> tokens at recall time. It closes 2 of the 8 failures (Lourenço and
-> Shahabuddin) at the cost of one regression (Air_Products), net +1.
-> Extending the regex to cover "succeed" / "succeeded" / "preceded
-> by" would close Bajram_Begaj-predecessor on the same mechanism.
+The remaining headline case is `Bajram_Begaj-predecessor`. It should
+close via a regex extension to role detection covering phrasing such
+as "who did X succeed", "preceded by", and similar forms.
 
-### `atom-coverage-gap` (2 facts)
+### `atom-coverage-gap` (1 headline fact)
 
-The query parser correctly identifies the container (e.g. country,
-office) and the role (e.g. `honorific_prefix`), and the bridge fires —
-but no atom is indexed in the schema cortex for that (container, role)
-pair. The mechanism is present; the data isn't.
+The query parser identifies the container and role, and the bridge
+fires, but no atom is indexed in the schema cortex for that
+container-role pair. The remaining headline case is
+`Alexander_Van_der_Bellen-citizenship`, a list-tail fact with an
+at-birth temporal operator.
 
-> **What fixing it costs.** Schema-cortex expansion: index more atoms
-> during ingest. Either by extending the static set of role-anchor
-> patterns, or by learning them from the corpus at index time. The
-> work is well-scoped but is in a separate research thread (§OPEN-9
-> in the production docs) and was not in scope for the published
-> result.
+Fixing it requires schema-cortex expansion: index more atoms during
+ingest, either through a broader static set of role-anchor patterns
+or through learned corpus-specific acquisition.
 
-### `entity-slot-gap` (0 facts after empirical reassignment)
+### `out-of-scope` (4 headline facts)
 
-Originally we expected several facts to fall here — the structural
-mismatch where the query names a country or office and the cell is
-keyed on the office-holder's name. These cases are the OPEN-7 thread
-in the production docs (closes via "atom-bridge" retrieval, not
-lexical fallback).
+A fact is `out-of-scope` if `contradiction_free=0` for every system
+tested: Hippocampus, BM25-TFIDF, MiniLM-unfiltered, and
+MiniLM-filtered(2024). The interpretation is that the question is
+structurally unanswerable from the 44-fact corpus as prepared. This
+is not a Hippocampus-specific deficiency; we list it here for
+honesty rather than exclude it from the denominator.
 
-After cross-system inspection (see below) all four facts we initially
-classified here turned out to be `out-of-scope` — i.e. *no* system on
-the bench answers them. That makes the failure mode a corpus-level
-defeat rather than a Hippocampus-level one. We have left
-`entity-slot-gap` in the taxonomy as a defined category because the
-underlying retrieval defeat is real, but on this 44-fact corpus no
-fact lives under that label in `results/hippocampus.jsonl`.
+The 4 facts are `Abdelmadjid_Tebboune-primeminister`,
+`Hamad_bin_Isa_Al_Khalifa-regent`, `Javier_Milei-office`, and
+`Vahagn_Khachaturyan-successor1`.
 
-### `out-of-scope` (4 facts)
+### Role-expansion regression (1 headline fact)
 
-A fact is `out-of-scope` if `contradiction_free=0` for **every**
-system tested (Hippocampus, BM25-TFIDF, MiniLM-unfiltered,
-MiniLM-filtered(2024)) in the canonical run. The interpretation: the
-question is structurally unanswerable from the 44-fact corpus as we
-prepared it. This is not a Hippocampus-specific failure; we list it
-here for honesty, not as a Hippocampus deficiency.
-
-The 4 facts: `Abdelmadjid_Tebboune-primeminister`,
-`Hamad_bin_Isa_Al_Khalifa-regent`, `Javier_Milei-office`,
-`Vahagn_Khachaturyan-successor1`. All four are entity-slot-shaped
-queries where the question names the country / office and the answer
-is the office-holder. The lexical-overlap baselines have no path to
-those cells, and the MiniLM-filtered dense retrieval also doesn't
-recover them on this corpus.
+`Air_Products-num_employees` passed in the earlier baseline artifact
+and failed in the headline artifact. With `num_employees` appended to
+the query string, ranking shifted and a stale value won. This is a
+real regression, and it is why the methodology labels the mechanism
+GREEN on net metric but YELLOW on regression safety.
 
 ## Derivation manifest
 
-Every category assignment above is traceable to a specific section of
-the project's internal documentation **and** to a specific row in a
-specific JSONL. The derivation rules are:
+1. **The 7-fact set.** Read every row of
+   `results/hippocampus.jsonl`, filter
+   `contradiction_free == 0`, and count the result. You can reproduce
+   the count with:
 
-1. **The 8-fact set.** Read every row of `results/hippocampus.jsonl`,
-   filter `contradiction_free == 0`. The result is exactly the 8
-   listed above. This is reproducible: any reader can run
-   `npx tsx scripts/score.ts results/hippocampus.jsonl` and count
-   8 rows where `contradiction_free` is 0.
+   ```bash
+   npx tsx scripts/score.ts results/hippocampus.jsonl
+   ```
 
-2. **The `out-of-scope` set.** For each fact ID in the 8, check the
+2. **The earlier baseline set.** Read every row of
+   `results/hippocampus-baseline.jsonl` and filter `contradiction_free == 0`.
+   That artifact has 8 failed rows and is retained so readers can see
+   which facts changed.
+
+3. **The `out-of-scope` set.** For each failed fact, check the
    `contradiction_free` field in `results/bm25.jsonl`,
-   `results/minilm-filtered.jsonl`, and — in the source bundle the
-   results were filtered from — the MiniLM-unfiltered row. A fact is
-   `out-of-scope` if and only if every system has
-   `contradiction_free == 0` for that ID. This gave us the four
-   listed above.
+   `results/minilm-filtered.jsonl`, and, in the source bundle the
+   results were filtered from, the MiniLM-unfiltered row. A fact is
+   `out-of-scope` only when every system has
+   `contradiction_free == 0` for that ID.
 
-3. **`lexical-seeding-gap` vs `atom-coverage-gap`.** Source:
-   §6125 + §7.18.3 of the project guide on the production repository.
-   The §6125 table enumerates the failure modes by query shape and
-   maps each to one of the categories above. Specifically:
+4. **Per-fact assignment.** The `failure_category` field in the JSONL
+   artifacts reflects the source build mapping. The Air Products row
+   has `failure_category: null` because it is a regression introduced
+   by the role-token expansion rather than one of the original
+   baseline failure buckets.
 
-   - `birth_place` queries → `lexical-seeding-gap` (the canonical
-     parameter name is `birth_place`, the query word is "born").
-     This category was the load-bearing prediction of §6119 (commit
-     `882ccff` on the internal docs branch). Closes via OPEN-6.
-   - `predecessor` / `successor` queries → `lexical-seeding-gap` for
-     the cases where `detectRole` would resolve the role if the regex
-     were extended; `entity-slot-gap` for the cases where the query
-     names a country and not a person.
-   - `honorific_prefix` query with container parsed but no atom →
-     `atom-coverage-gap`. Lexical fallback recovered Shahabuddin
-     under OPEN-6 anyway; the category still applies, because the
-     mechanism that was *expected* to fix it (schema-cortex
-     atom-coverage extension) is the one still owed.
+## What fixing the remaining 7 looks like
 
-4. **Per-fact assignment.** Hard-coded in the build script
-   (`.evals-build.py` in the source repo, not committed here) and
-   reflected in the `failure_category` field of every row in
-   `results/hippocampus.jsonl`. The mapping prior was derived from
-   §6119 and §6125; the empirical cross-system check (rule 2)
-   overrode the prior for `Tebboune`, `Hamad_bin_Isa`, and
-   `Khachaturyan` (we expected these to be `entity-slot-gap` but
-   they fail across all systems, so the empirical signal makes them
-   `out-of-scope`). One disagreement went the other way —
-   `Alexander_Van_der_Bellen-citizenship` was hypothesized
-   `out-of-scope` but is empirically answered by at least one
-   baseline, so we reassigned it to `atom-coverage-gap` per §6125's
-   nearest-match rule. Both deviations are surfaced rather than
-   silently applied.
+The 4 `out-of-scope` facts require either a different corpus
+selection or a mechanism that no retrieval system in this bench
+currently has.
 
-## What fixing the remaining 6 looks like
+The 3 Hippocampus-specific fixes are:
 
-The 4 `out-of-scope` facts are not Hippocampus-fixable in isolation —
-fixing them requires either a different corpus selection or a
-mechanism that no retrieval system in our bench currently has. We
-report them honestly rather than excluding them from the denominator.
-
-The 2 remaining Hippocampus-specific failures after OPEN-6:
-
-- **`Bajram_Begaj-predecessor`** (`lexical-seeding-gap`) — closes via
-  a regex extension to `detectRole` covering "who did X succeed",
-  "preceded by", and similar phrasings. Estimated work: small. Not
-  yet implemented because the load-bearing prediction was
-  `birth_place` and we did not want to bundle extensions into the
-  same falsifier window.
-- **`Alexander_Van_der_Bellen-citizenship`** (`atom-coverage-gap`) —
-  list-tail fact with an at-birth temporal operator. The
-  schema-cortex atom for `(Austria, citizenship-at-birth)` does not
-  exist in the current cortex build. Closes via OPEN-9 schema
-  acquisition work (separate research thread).
-
-## A note on the count
-
-The blog post may quote the "8 always-failing facts" as a headline
-number. That is correct for the canonical run. After OPEN-6, the
-8 becomes 6 (Lourenço and Shahabuddin close); after the
-hypothetical regex extension and the OPEN-9 schema work, the 6 would
-become 4 (the four `out-of-scope` facts, which neither OPEN-6 nor
-OPEN-9 can address). We are not publishing the latter as a result —
-this is a roadmap statement, not a measured number.
+- `Bajram_Begaj-predecessor`: extend role detection for succession
+  phrasing.
+- `Alexander_Van_der_Bellen-citizenship`: expand schema-cortex atom
+  coverage for list-tail temporal citizenship.
+- `Air_Products-num_employees`: fix the ranking path that lets the
+  role-expanded query prefer a stale employee-count cell.

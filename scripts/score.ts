@@ -5,7 +5,7 @@
 //   npx tsx scripts/score.ts results/hippocampus.jsonl
 //   npx tsx scripts/score.ts results/hippocampus.jsonl results/minilm-filtered.jsonl ...
 //   npx tsx scripts/score.ts --write-summary    (rebuilds results/summary.json from
-//                                                 all four canonical JSONLs)
+//                                                 the public result JSONLs)
 //
 // Every number in results/summary.json must be reproducible by running this
 // script. If you change the JSONLs and run --write-summary, the summary.json
@@ -117,12 +117,12 @@ function tokenRatio(numerator: SystemStats, denominator: SystemStats): number {
 function buildHeadline(allFiles: Record<string, ReturnType<typeof scoreFile>>) {
   // summary.json shape — keyed by file/system so every number is anchored.
   const hippo = allFiles["hippocampus.jsonl"];
-  const hippoOpen6 = allFiles["hippocampus-open6.jsonl"];
+  const hippoBaseline = allFiles["hippocampus-baseline.jsonl"];
   const minilm = allFiles["minilm-filtered.jsonl"];
   const bm25 = allFiles["bm25.jsonl"];
 
+  const hippoBaselineStats = hippoBaseline.systems["Hippocampus"];
   const hippoStats = hippo.systems["Hippocampus"];
-  const hippoOpen6Stats = hippoOpen6.systems["Hippocampus"];
   const minilmStats = minilm.systems["MiniLM-filtered(2024)"];
   const bm25Stats = bm25.systems["BM25-TFIDF"];
 
@@ -132,7 +132,7 @@ function buildHeadline(allFiles: Record<string, ReturnType<typeof scoreFile>>) {
       "Headline metrics for hippocampus-evals. Every value here is reproducible by running scripts/score.ts on the corresponding file in results/.",
     files: allFiles,
     headline: {
-      hippocampus_canonical: {
+      hippocampus: {
         overall_cf: `${Math.round(hippoStats.overall.contradiction_free * hippoStats.overall.n)}/${hippoStats.overall.n}`,
         overall_cf_pct: +(hippoStats.overall.contradiction_free * 100).toFixed(2),
         non_list_tail_cf: `${Math.round(hippoStats.non_list_tail.contradiction_free * hippoStats.non_list_tail.n)}/${hippoStats.non_list_tail.n}`,
@@ -142,13 +142,15 @@ function buildHeadline(allFiles: Record<string, ReturnType<typeof scoreFile>>) {
         mean_tokens: +hippoStats.overall.mean_tokens.toFixed(4),
         commit_hash: hippo.meta.commit_hash,
       },
-      hippocampus_open6: {
-        overall_cf: `${Math.round(hippoOpen6Stats.overall.contradiction_free * hippoOpen6Stats.overall.n)}/${hippoOpen6Stats.overall.n}`,
-        overall_cf_pct: +(hippoOpen6Stats.overall.contradiction_free * 100).toFixed(2),
-        non_list_tail_cf: `${Math.round(hippoOpen6Stats.non_list_tail.contradiction_free * hippoOpen6Stats.non_list_tail.n)}/${hippoOpen6Stats.non_list_tail.n}`,
-        non_list_tail_cf_pct: +(hippoOpen6Stats.non_list_tail.contradiction_free * 100).toFixed(2),
-        mean_tokens: +hippoOpen6Stats.overall.mean_tokens.toFixed(4),
-        commit_hash: hippoOpen6.meta.commit_hash,
+      hippocampus_baseline: {
+        overall_cf: `${Math.round(hippoBaselineStats.overall.contradiction_free * hippoBaselineStats.overall.n)}/${hippoBaselineStats.overall.n}`,
+        overall_cf_pct: +(hippoBaselineStats.overall.contradiction_free * 100).toFixed(2),
+        non_list_tail_cf: `${Math.round(hippoBaselineStats.non_list_tail.contradiction_free * hippoBaselineStats.non_list_tail.n)}/${hippoBaselineStats.non_list_tail.n}`,
+        non_list_tail_cf_pct: +(hippoBaselineStats.non_list_tail.contradiction_free * 100).toFixed(2),
+        list_tail_cf: `${Math.round(hippoBaselineStats.list_tail.contradiction_free * hippoBaselineStats.list_tail.n)}/${hippoBaselineStats.list_tail.n}`,
+        list_tail_cf_pct: +(hippoBaselineStats.list_tail.contradiction_free * 100).toFixed(2),
+        mean_tokens: +hippoBaselineStats.overall.mean_tokens.toFixed(4),
+        commit_hash: hippoBaseline.meta.commit_hash,
       },
       minilm_filtered_2024: {
         overall_cf: `${Math.round(minilmStats.overall.contradiction_free * minilmStats.overall.n)}/${minilmStats.overall.n}`,
@@ -164,7 +166,7 @@ function buildHeadline(allFiles: Record<string, ReturnType<typeof scoreFile>>) {
     token_efficiency: {
       "minilm_filtered_over_hippocampus": +tokenRatio(minilmStats.overall, hippoStats.overall).toFixed(4),
       "bm25_over_hippocampus": +tokenRatio(bm25Stats.overall, hippoStats.overall).toFixed(4),
-      "minilm_filtered_over_hippocampus_open6": +tokenRatio(minilmStats.overall, hippoOpen6Stats.overall).toFixed(4),
+      "minilm_filtered_over_hippocampus_baseline": +tokenRatio(minilmStats.overall, hippoBaselineStats.overall).toFixed(4),
     },
     failure_categories: {
       "lexical-seeding-gap":
@@ -172,7 +174,7 @@ function buildHeadline(allFiles: Record<string, ReturnType<typeof scoreFile>>) {
       "atom-coverage-gap":
         "Bridge fires correctly (container + role parsed) but no atom is indexed in the schema cortex for (container, role). Example: Shahabuddin-honorific_prefix.",
       "entity-slot-gap":
-        "Country/office ↔ office-holder structural mismatch. Query names a country; cell is keyed on the office-holder; lexical encoder has no country-keyed seed. OPEN-7 territory.",
+        "Country/office ↔ office-holder structural mismatch. Query names a country; cell is keyed on the office-holder; lexical encoder has no country-keyed seed. Atom-bridge retrieval territory.",
       "out-of-scope":
         "Fact fails on every system tested (Hippocampus, BM25-TFIDF, MiniLM-unfiltered, MiniLM-filtered(2024)). The question is structurally unanswerable from the 44-fact corpus at the cutoff date 2024-12-31; this is not a Hippocampus-specific failure.",
     },
@@ -190,7 +192,7 @@ function main() {
     const resultsDir = resolve(root, "results");
     const files = [
       "hippocampus.jsonl",
-      "hippocampus-open6.jsonl",
+      "hippocampus-baseline.jsonl",
       "minilm-filtered.jsonl",
       "bm25.jsonl",
     ];
