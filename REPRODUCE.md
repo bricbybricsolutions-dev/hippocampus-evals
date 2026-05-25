@@ -54,15 +54,15 @@ Expected fields in the printed output for `Hippocampus`:
 {
   "overall": {
     "n": 44,
-    "contradiction_free": 0.8409090909090909,    // 37/44 = 84.09%
-    "mean_tokens": 12.181818181818182,            // ≈ 12.18
+    "contradiction_free": 0.8636363636363636,    // 38/44 = 86.36%
+    "mean_tokens": 12.136363636363637,            // ≈ 12.14
     "mean_units": 1,
-    "accuracy": 0.8636363636363636                // 38/44 raw answer correctness
+    "accuracy": 0.8863636363636364                // 39/44 raw answer correctness
   },
   "non_list_tail": {
     "n": 38,
-    "contradiction_free": 0.868421052631579,     // 33/38 = 86.84%
-    "mean_tokens": 12.157894736842104
+    "contradiction_free": 0.8947368421052632,    // 34/38 = 89.47%
+    "mean_tokens": 12.105263157894736
   },
   "list_tail": {
     "n": 6,
@@ -71,6 +71,18 @@ Expected fields in the printed output for `Hippocampus`:
   }
 }
 ```
+
+### From `results/hippocampus-open6.jsonl` (intermediate audit artifact)
+
+```
+$ npx tsx scripts/score.ts results/hippocampus-open6.jsonl
+```
+
+This is the OPEN-6 phase 1 result before the §7.21 past-tense `succeed`
+extension landed (37/44, 33/38 non-list-tail, mean tokens 12.18).
+Retained so readers can verify exactly which fact changed when the
+extension landed: `Bajram_Begaj-predecessor` flips from CF=0 to CF=1,
+all other 43 rows are byte-identical on scoring-relevant fields.
 
 ### From `results/hippocampus-baseline.jsonl`
 
@@ -115,13 +127,16 @@ Expected headline fields:
 npx tsx scripts/score.ts --write-summary
 ```
 
-This reads all four `results/*.jsonl` files and rewrites
+This reads the four primary `results/*.jsonl` files (hippocampus,
+hippocampus-baseline, minilm-filtered, bm25) and rewrites
 `results/summary.json` in place. The resulting `summary.json` should
 be byte-identical to the one already committed to the repository
 (modulo trailing newline conventions on Windows vs POSIX). The
-`headline.hippocampus.overall_cf` field must be exactly `"37/44"`;
+`headline.hippocampus.overall_cf` field must be exactly `"38/44"`;
 the `token_efficiency.minilm_filtered_over_hippocampus` field must
-be `9.972`.
+be `10.0094`. The `hippocampus-open6.jsonl` audit artifact is not
+loaded by `--write-summary` — it is scoreable individually via
+`scripts/score.ts results/hippocampus-open6.jsonl`.
 
 ## What is *not* reproducible from this repository alone
 

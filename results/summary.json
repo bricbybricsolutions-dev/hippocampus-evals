@@ -8,17 +8,17 @@
         "Hippocampus": {
           "overall": {
             "n": 44,
-            "accuracy": 0.8636363636363636,
-            "contradiction_free": 0.8409090909090909,
+            "accuracy": 0.8863636363636364,
+            "contradiction_free": 0.8636363636363636,
             "mean_units": 1,
-            "mean_tokens": 12.181818181818182
+            "mean_tokens": 12.136363636363637
           },
           "non_list_tail": {
             "n": 38,
-            "accuracy": 0.868421052631579,
-            "contradiction_free": 0.868421052631579,
+            "accuracy": 0.8947368421052632,
+            "contradiction_free": 0.8947368421052632,
             "mean_units": 1,
-            "mean_tokens": 12.157894736842104
+            "mean_tokens": 12.105263157894736
           },
           "list_tail": {
             "n": 6,
@@ -30,9 +30,9 @@
         }
       },
       "meta": {
-        "commit_hash": "06a4212246969eda978d104619e60356b7afecf8",
-        "run_timestamp": 1779643055950,
-        "config": "bridge-config=full m1-config=baseline role-token-expansion=enabled"
+        "commit_hash": "3d349af7a22214c5a2f00ccfae93ef38928bb54f",
+        "run_timestamp": 1779749050485,
+        "config": "bridge-config=full m1-config=baseline role-token-expansion=enabled past-tense-succeed=enabled"
       }
     },
     "hippocampus-baseline.jsonl": {
@@ -137,14 +137,14 @@
   },
   "headline": {
     "hippocampus": {
-      "overall_cf": "37/44",
-      "overall_cf_pct": 84.09,
-      "non_list_tail_cf": "33/38",
-      "non_list_tail_cf_pct": 86.84,
+      "overall_cf": "38/44",
+      "overall_cf_pct": 86.36,
+      "non_list_tail_cf": "34/38",
+      "non_list_tail_cf_pct": 89.47,
       "list_tail_cf": "4/6",
       "list_tail_cf_pct": 66.67,
-      "mean_tokens": 12.1818,
-      "commit_hash": "06a4212246969eda978d104619e60356b7afecf8"
+      "mean_tokens": 12.1364,
+      "commit_hash": "3d349af7a22214c5a2f00ccfae93ef38928bb54f"
     },
     "hippocampus_baseline": {
       "overall_cf": "36/44",
@@ -168,8 +168,8 @@
     }
   },
   "token_efficiency": {
-    "minilm_filtered_over_hippocampus": 9.972,
-    "bm25_over_hippocampus": 40.6549,
+    "minilm_filtered_over_hippocampus": 10.0094,
+    "bm25_over_hippocampus": 40.8071,
     "minilm_filtered_over_hippocampus_baseline": 10.5217
   },
   "failure_categories": {

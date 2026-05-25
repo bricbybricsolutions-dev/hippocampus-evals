@@ -1,6 +1,6 @@
 # FAILURES.md
 
-The 7 facts where the headline Hippocampus run returns a
+The 6 facts where the headline Hippocampus run returns a
 non-contradiction-free answer, named individually, categorized, and
 traced back to the source artifacts.
 
@@ -10,40 +10,60 @@ report aggregate accuracy and leave the failure cases as an exercise
 for the skeptic. We do not. The failed rows are listed below by name,
 and fixing any one of them is a known piece of work with a known cost.
 
-## The 7 Hippocampus-failing facts
+## The 6 Hippocampus-failing facts
 
 These are the facts where `contradiction_free=0` in
 `results/hippocampus.jsonl`, the headline Hippocampus artifact.
 
 | # | Fact ID                                  | Failure category       | Notes |
 |---|------------------------------------------|------------------------|-------|
-| 1 | `Abdelmadjid_Tebboune-primeminister`     | `out-of-scope`         | Answer is present, but not contradiction-free |
+| 1 | `Abdelmadjid_Tebboune-primeminister`     | `out-of-scope`         | Every tested system fails contradiction-free |
 | 2 | `Air_Products-num_employees`             | role-expansion regression | Ranking shifted to a stale employee-count cell |
 | 3 | `Alexander_Van_der_Bellen-citizenship`   | `atom-coverage-gap`    | List-tail temporal citizenship fact |
-| 4 | `Bajram_Begaj-predecessor`               | `lexical-seeding-gap`  | Succession phrasing misses the indexed role token |
-| 5 | `Hamad_bin_Isa_Al_Khalifa-regent`        | `out-of-scope`         | Every tested system fails contradiction-free |
-| 6 | `Javier_Milei-office`                    | `out-of-scope`         | Every tested system fails contradiction-free |
-| 7 | `Vahagn_Khachaturyan-successor1`         | `out-of-scope`         | Every tested system fails contradiction-free |
+| 4 | `Hamad_bin_Isa_Al_Khalifa-regent`        | `out-of-scope`         | Every tested system fails contradiction-free |
+| 5 | `Javier_Milei-office`                    | `out-of-scope`         | Every tested system fails contradiction-free |
+| 6 | `Vahagn_Khachaturyan-successor1`         | `out-of-scope`         | Every tested system fails contradiction-free |
+
+`Bajram_Begaj-predecessor` was on this list in the prior headline
+artifact (`results/hippocampus-open6.jsonl`, 37/44). It now passes —
+closed by the past-tense `succeed` regex extension landed on
+`primitive/code-hippo/prodV1` (commit `3d349af`, documented as §7.21 in
+the production project guide). The new alias matches the past-tense
+bare-infinitive form "did X succeed" and routes the lexical seed to
+the `predecessor` cell; necessity ablation reverts Bajram to CF=0
+cleanly. Per-fact zero-regression bar held (strict, not net) — the
+mechanism touches only the Bajram query across the 44-fact corpus.
 
 The earlier baseline artifact, `results/hippocampus-baseline.jsonl`, had 8
 contradiction-free failures. The role-token expansion closed
 `João_Lourenço-birth_place` and
 `Mohammed_Shahabuddin-honorific_prefix`, but introduced the
-`Air_Products-num_employees` regression. Net effect: 37/44
-contradiction-free instead of 36/44.
+`Air_Products-num_employees` regression — net 37/44 (preserved in
+`results/hippocampus-open6.jsonl` for audit). The past-tense `succeed`
+extension closed `Bajram_Begaj-predecessor` on top of that — net
+**38/44**.
 
 ## Failure categories
 
-### `lexical-seeding-gap` (1 headline fact)
+### `lexical-seeding-gap` (0 headline facts)
 
 The query's English vocabulary does not share any token with the
 canonical infobox parameter name that Hippocampus stores in the cell.
 The lexical encoder is token-based; if no token overlaps, no cell is
 seeded, and downstream temporal-disambiguation logic cannot help.
 
-The remaining headline case is `Bajram_Begaj-predecessor`. It should
-close via a regex extension to role detection covering phrasing such
-as "who did X succeed", "preceded by", and similar forms.
+The two original `lexical-seeding-gap` facts — `João_Lourenço-birth_place`
+and `Bajram_Begaj-predecessor` — both close under the headline artifact.
+Lourenço closed via OPEN-6 phase 1's role-token expansion in the
+`birth_place` alias; Bajram closed via the §7.21 past-tense `succeed`
+extension. The mechanism in both cases is the same: append the
+canonical `fact_type` token to the lexical seed cue when the parser
+detects a known role pattern in the query.
+
+The category is preserved in the taxonomy because the underlying
+retrieval defeat is real and corpus-dependent — a new corpus with
+different verb conjugations or property names could surface new
+`lexical-seeding-gap` facts that the current alias map does not cover.
 
 ### `atom-coverage-gap` (1 headline fact)
 
@@ -80,7 +100,7 @@ GREEN on net metric but YELLOW on regression safety.
 
 ## Derivation manifest
 
-1. **The 7-fact set.** Read every row of
+1. **The 6-fact set.** Read every row of
    `results/hippocampus.jsonl`, filter
    `contradiction_free == 0`, and count the result. You can reproduce
    the count with:
@@ -91,8 +111,11 @@ GREEN on net metric but YELLOW on regression safety.
 
 2. **The earlier baseline set.** Read every row of
    `results/hippocampus-baseline.jsonl` and filter `contradiction_free == 0`.
-   That artifact has 8 failed rows and is retained so readers can see
-   which facts changed.
+   That artifact has 8 failed rows (the original canonical run at
+   `a00e8f8`) and is retained so readers can see which facts changed
+   under the role-token expansion. The intermediate artifact
+   `results/hippocampus-open6.jsonl` (7 failures, 37/44) shows the
+   state after OPEN-6 phase 1 but before the §7.21 past-tense extension.
 
 3. **The `out-of-scope` set.** For each failed fact, check the
    `contradiction_free` field in `results/bm25.jsonl`,
@@ -107,17 +130,22 @@ GREEN on net metric but YELLOW on regression safety.
    by the role-token expansion rather than one of the original
    baseline failure buckets.
 
-## What fixing the remaining 7 looks like
+## What fixing the remaining 6 looks like
 
 The 4 `out-of-scope` facts require either a different corpus
 selection or a mechanism that no retrieval system in this bench
 currently has.
 
-The 3 Hippocampus-specific fixes are:
+The 2 remaining Hippocampus-specific fixes are:
 
-- `Bajram_Begaj-predecessor`: extend role detection for succession
-  phrasing.
 - `Alexander_Van_der_Bellen-citizenship`: expand schema-cortex atom
-  coverage for list-tail temporal citizenship.
+  coverage for list-tail temporal citizenship. Also requires an
+  `at_birth` temporal-operator implementation in the resolver
+  (the query's temporal classifier already extracts `at_birth`,
+  but the bridge precondition rejects anything other than `current`).
 - `Air_Products-num_employees`: fix the ranking path that lets the
-  role-expanded query prefer a stale employee-count cell.
+  role-expanded query prefer a stale employee-count cell. The
+  `--pt2qm` (Pass-2 query-word tiebreak) fix on `primitive/code-hippo/prodV1`
+  closes this in the source repo, but is not yet enabled in the
+  headline artifact in this evals repo — a separate productization
+  decision.
