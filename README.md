@@ -11,7 +11,7 @@
 
   <br>
 
-  **[Read the full write-up →](https://your-blog-post-link)** &nbsp;·&nbsp; **[Contact us](mailto:your@email.com)**
+  **[Read the full write-up →](https://your-blog-post-link)** &nbsp;·&nbsp; **[Contact us](https://www.linkedin.com/in/anees-alsajir/)**
 
 </div>
 
@@ -99,5 +99,5 @@ Dataset (`data/wikipedia-44/`): [CC BY-SA 4.0](data/wikipedia-44/LICENSE) — de
 ---
 
 <div align="center">
-  <sub>Built by <a href="https://github.com/bricbybricsolutions-dev">BricbyBric</a> · Pre-committed falsifiers on every claim · <a href="mailto:your@email.com">Get in touch</a></sub>
+  <sub>Built by <a href="https://github.com/bricbybricsolutions-dev">BricbyBric</a> · Pre-committed falsifiers on every claim · <a href="https://www.linkedin.com/in/anees-alsajir/">Get in touch</a></sub>
 </div>
