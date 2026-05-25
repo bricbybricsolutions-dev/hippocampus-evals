@@ -1,0 +1,18 @@
+{
+  "name": "hippocampus-evals",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Public benchmark artifacts and scoring script for the Hippocampus Wikipedia 44-fact eval. The production engine is not in this repo.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "scripts": {
+    "score": "tsx scripts/score.ts",
+    "build-summary": "tsx scripts/score.ts --write-summary"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.2"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}
