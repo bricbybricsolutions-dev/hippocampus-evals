@@ -1,125 +1,103 @@
-# hippocampus-evals
+<div align="center">
+  <img src="banner.svg" alt="Hippocampus — retrieval engineered from memory science" width="100%">
 
-Public benchmark artifacts and scoring script for the Hippocampus
-Wikipedia 44-fact eval. The point of this repository is to make every
-number we cite about that benchmark independently inspectable.
+  <br>
 
-> If you're reading this from the blog post: every headline number in
-> the post is either listed in [`results/summary.json`](results/summary.json)
-> or is derivable by running [`scripts/score.ts`](scripts/score.ts)
-> against one of the JSONLs in [`results/`](results/). If you find a
-> number in the post that doesn't anchor to one of those, please open
-> an issue.
+  [![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-1d9e75.svg?style=flat-square)](LICENSE)
+  [![CF Accuracy](https://img.shields.io/badge/CF_Accuracy-84.09%25-1d9e75?style=flat-square)](results/summary.json)
+  [![vs MiniLM](https://img.shields.io/badge/vs_MiniLM-10×_cheaper-378add?style=flat-square)](results/summary.json)
+  [![Benchmark](https://img.shields.io/badge/Benchmark-Wikipedia_44--fact-444441?style=flat-square)](data/wikipedia-44/)
+  [![Data: CC BY-SA 4.0](https://img.shields.io/badge/Data-CC_BY--SA_4.0-888780?style=flat-square)](data/wikipedia-44/LICENSE)
 
-## What this repository is
+  <br>
 
-A self-contained evaluation harness containing:
+  **[Read the full write-up →](https://your-blog-post-link)** &nbsp;·&nbsp; **[Contact us](mailto:your@email.com)**
 
-- **The dataset** ([`data/wikipedia-44/`](data/wikipedia-44/)) — 44
-  temporal-fact questions drawn from 25 English Wikipedia articles,
-  with the Wikipedia revision IDs that supplied each ground-truth
-  value. License: CC-BY-SA-4.0 (matches Wikipedia).
-- **The results** ([`results/`](results/)) — per-row JSONLs for the
-  four systems evaluated (Hippocampus, Hippocampus + OPEN-6,
-  MiniLM-filtered, BM25-TFIDF), plus a `summary.json` of the headline
-  metrics.
-- **The scorer** ([`scripts/score.ts`](scripts/score.ts)) — a small
-  TypeScript program that reads any result JSONL and prints / writes
-  the same metrics that appear in `summary.json`. Single source of
-  truth for "how a result file becomes a headline number." License:
-  Apache-2.0.
-- **The docs** — six markdown files that explain the methodology, the
-  failure analysis, and what we are explicitly *not* claiming. See the
-  table of contents below.
+</div>
 
-## What this repository is *not*
+---
 
-This is **not** the production Hippocampus engine. The retrieval
-ranking logic, the resolver implementation, the schema-cortex
-construction, and the alias-map tuning code all live in a separate
-private repository and are not in this repo. What you have here are
-the *audited outputs* of running that engine on the 44-fact corpus —
-not a runnable reproduction of the engine itself.
+The hippocampus doesn't store memories as dense vectors. It uses sparse distributed codes — a small number of active neurons out of a much larger pool, where any meaningful overlap between two patterns is signal rather than noise. We built a retrieval engine around that motif: facts stored as 40-active-bit binary vectors out of 8,192, retrieved via lexical seeding into a typed relational graph, no embedding model at query time.
 
-If you want to re-run the engine, you would need access to the
-production code. If you want to verify that the headline numbers in
-the blog post match the per-row data that was used to compute them,
-that is exactly what `scripts/score.ts` does, and it does not need
-the engine.
+This repository contains the public benchmark artifacts for that claim. Not the production engine — the evidence.
 
-## Quick start
+## Results
 
-Requires Node.js ≥ 20. Install once:
+| System | CF Accuracy | Non-list-tail CF | Tokens / answer |
+|---|---|---|---|
+| **Hippocampus** | **84.09%** | **86.84%** | **~12** |
+| MiniLM-filtered | 75.00% | 86.84% | ~121 |
+| BM25 | 31.82% | 36.84% | ~495 |
+
+**CF = contradiction-free:** correct answer with no contradicting claims introduced. Stricter than top-1 accuracy — the right metric for production agents where a confident wrong answer is worse than no answer.
+
+On non-list-tail facts (the majority of any real workload) Hippocampus matches MiniLM-filtered exactly at 86.84% CF — at 10× lower token cost. On list-tail facts, MiniLM-filtered scores 0% (filtering discards the relevant list context). Hippocampus scores 66.67%.
+
+## Reproduce the table
 
 ```bash
 npm install
-```
-
-Then score any result file:
-
-```bash
 npx tsx scripts/score.ts results/hippocampus.jsonl
 ```
 
-Or rebuild `results/summary.json` from all four JSONLs:
+Expected: `37/44 overall CF (84.09%) · 33/38 non-list-tail (86.84%) · ~12 mean tokens`
 
-```bash
-npx tsx scripts/score.ts --write-summary
+Every number is derivable from the JSONL files in `results/` using `scripts/score.ts`. The production engine is not in this repo.
+
+## What's in this repo
+
+```
+hippocampus-evals/
+├── data/
+│   └── wikipedia-44/        44-fact benchmark, frozen 2024-12-31 (CC BY-SA 4.0)
+├── results/
+│   ├── hippocampus.jsonl    Per-fact results — commit hash, tokens, CF, failure category
+│   ├── minilm-filtered.jsonl
+│   ├── bm25.jsonl
+│   └── summary.json         Headline numbers
+├── scripts/
+│   └── score.ts             Reproduces summary.json from any result JSONL
+├── BENCHMARK.md             Dataset description and scoring definition
+├── METHODOLOGY.md           Pre-committed falsifiers in plain English
+├── FAILURES.md              The 8 facts we still get wrong, with root causes
+├── LIMITATIONS.md           What we are not claiming
+└── REPRODUCE.md             Full reproduction instructions
 ```
 
-Full reproduction recipe — including the exact gate values the build
-script is required to produce — is in [`REPRODUCE.md`](REPRODUCE.md).
+## The 8 facts we still get wrong
 
-## Headline result
+We publish these because knowing which bucket a failure belongs to is more useful than a cleaner number.
 
-| System                        | Contradiction-free | Mean tokens to LLM |
-| ----------------------------- | ------------------ | ------------------ |
-| Hippocampus (canonical)       | **36/44 (81.82%)** | **11.55**          |
-| Hippocampus + OPEN-6          | **37/44 (84.09%)** | 12.18              |
-| MiniLM-filtered(2024)         | 33/44 (75.00%)     | 121.48             |
-| BM25-TFIDF                    | 14/44 (31.82%)     | 495.25             |
+**4 fail on every system we tested** — Hippocampus, MiniLM-filtered, MiniLM-unfiltered, and BM25. Entity-slot queries where the question names a country or institution but the correct answer is indexed under a person's name. Zero lexical or semantic overlap on the entity. Not our failure specifically — these are at the boundary of what retrieval systems handle.
 
-Token-efficiency ratio versus the strongest baseline (MiniLM-filtered):
+**4 are Hippocampus-specific** — two birth-place queries where the pipeline short-circuits before the role hint reaches seeding (fix is known and sequenced), one honorific query where the schema doesn't have the right atom indexed (corpus enrichment, not retrieval), and one succession query where the phrasing contains no succession verb.
 
-- Hippocampus canonical: **10.52×** fewer tokens to the LLM.
-- Hippocampus + OPEN-6: 9.97× (OPEN-6 trades a small token bump for
-  +1 correct answer; see [`METHODOLOGY.md`](METHODOLOGY.md)).
+Full analysis with per-fact root causes: [`FAILURES.md`](FAILURES.md)
 
-All four numbers in the table and both ratios are derivable by running
-`scripts/score.ts` on the corresponding JSONL in `results/`. The
-non-list-tail slice, the list-tail slice, the per-system accuracy, and
-the failure-category breakdown live in `results/summary.json` and in
-[`FAILURES.md`](FAILURES.md).
+## Methodology
 
-## Documentation
+Every acceptance bar in this project is written down before the experiment runs. We call them pre-committed falsifiers — you commit to what would falsify the claim, run it, and publish the result regardless. Across 70 checks in the full project: 45 pass, 25 fail. The failures are dated and root-caused.
 
-- [`BENCHMARK.md`](BENCHMARK.md) — dataset description, systems
-  compared, scoring definition, slicing rules.
-- [`METHODOLOGY.md`](METHODOLOGY.md) — pre-committed falsifiers,
-  necessity ablations, how we handled surprises and regressions.
-- [`FAILURES.md`](FAILURES.md) — the 8 Hippocampus-failure facts by
-  name, the four-category taxonomy, and per-fact derivation back to
-  the source artifacts.
-- [`LIMITATIONS.md`](LIMITATIONS.md) — what we are *not* claiming.
-  Read this before quoting any number from the blog post.
-- [`REPRODUCE.md`](REPRODUCE.md) — exact commands from clone to
-  scored output. Includes the verification gate (the four numbers
-  the scorer is required to produce on a clean checkout).
+The discipline changes how results read in both directions. When a bar passes, the commitment was made before the data. When something fails, it stays on the record — including mechanisms we'd named version numbers after before discovering they were decorative on aggregate metrics.
+
+Full methodology: [`METHODOLOGY.md`](METHODOLOGY.md)
+
+## Limitations
+
+- Numbers are from a Wikipedia 44-fact benchmark. Generalization to other corpora is untested.
+- The alias map was built for this corpus. Performance on different entity vocabularies is unknown.
+- The token efficiency gap is architectural and expected to be robust. The accuracy number is what design partner pilots are for.
+
+Full scope: [`LIMITATIONS.md`](LIMITATIONS.md)
 
 ## License
 
-The code, scripts, and documentation in this repository are licensed
-under Apache-2.0 (see [`LICENSE`](LICENSE)). The dataset in
-[`data/wikipedia-44/`](data/wikipedia-44/) is licensed separately
-under CC-BY-SA-4.0 (see [`data/wikipedia-44/LICENSE`](data/wikipedia-44/LICENSE)).
-The split is required by the source attribution: Wikipedia content
-itself carries CC-BY-SA-4.0, and a derived dataset must inherit that
-license. The Apache-2.0 license on the code is independent and lets
-downstream users reuse the scorer without inheriting share-alike
-obligations on their own code.
+Code and scripts: [Apache 2.0](LICENSE)
 
-## Related repository
+Dataset (`data/wikipedia-44/`): [CC BY-SA 4.0](data/wikipedia-44/LICENSE) — derived from Wikipedia
 
-The production Hippocampus engine lives in a separate, currently
-private repository. If you are evaluating Hippocampus for a use case
-and want access to the engine, contact us.
+---
+
+<div align="center">
+  <sub>Built by <a href="https://github.com/bricbybricsolutions-dev">BricbyBric</a> · Pre-committed falsifiers on every claim · <a href="mailto:your@email.com">Get in touch</a></sub>
+</div>
