@@ -1,6 +1,6 @@
 # FAILURES.md
 
-The 6 facts where the headline Hippocampus run returns a
+The 5 facts where the headline Hippocampus run returns a
 non-contradiction-free answer, named individually, categorized, and
 traced back to the source artifacts.
 
@@ -10,7 +10,7 @@ report aggregate accuracy and leave the failure cases as an exercise
 for the skeptic. We do not. The failed rows are listed below by name,
 and fixing any one of them is a known piece of work with a known cost.
 
-## The 6 Hippocampus-failing facts
+## The 5 Hippocampus-failing facts
 
 These are the facts where `contradiction_free=0` in
 `results/hippocampus.jsonl`, the headline Hippocampus artifact.
@@ -18,30 +18,31 @@ These are the facts where `contradiction_free=0` in
 | # | Fact ID                                  | Failure category       | Notes |
 |---|------------------------------------------|------------------------|-------|
 | 1 | `Abdelmadjid_Tebboune-primeminister`     | `out-of-scope`         | Every tested system fails contradiction-free |
-| 2 | `Air_Products-num_employees`             | role-expansion regression | Ranking shifted to a stale employee-count cell |
-| 3 | `Alexander_Van_der_Bellen-citizenship`   | `atom-coverage-gap`    | List-tail temporal citizenship fact |
-| 4 | `Hamad_bin_Isa_Al_Khalifa-regent`        | `out-of-scope`         | Every tested system fails contradiction-free |
-| 5 | `Javier_Milei-office`                    | `out-of-scope`         | Every tested system fails contradiction-free |
-| 6 | `Vahagn_Khachaturyan-successor1`         | `out-of-scope`         | Every tested system fails contradiction-free |
+| 2 | `Alexander_Van_der_Bellen-citizenship`   | `atom-coverage-gap`    | List-tail temporal citizenship fact (needs at-birth temporal operator) |
+| 3 | `Hamad_bin_Isa_Al_Khalifa-regent`        | `out-of-scope`         | Every tested system fails contradiction-free |
+| 4 | `Javier_Milei-office`                    | `out-of-scope`         | Every tested system fails contradiction-free |
+| 5 | `Vahagn_Khachaturyan-successor1`         | `out-of-scope`         | Every tested system fails contradiction-free |
 
-`Bajram_Begaj-predecessor` was on this list in the prior headline
-artifact (`results/hippocampus-open6.jsonl`, 37/44). It now passes —
-closed by the past-tense `succeed` regex extension landed on
-`primitive/code-hippo/prodV1` (commit `3d349af`, documented as §7.21 in
-the production project guide). The new alias matches the past-tense
-bare-infinitive form "did X succeed" and routes the lexical seed to
-the `predecessor` cell; necessity ablation reverts Bajram to CF=0
-cleanly. Per-fact zero-regression bar held (strict, not net) — the
-mechanism touches only the Bajram query across the 44-fact corpus.
+`Bajram_Begaj-predecessor` was on this list before §7.22 closed it
+via a past-tense `succeed` regex extension. `Air_Products-num_employees`
+was on this list before §7.23 closed it via the pt2qm Pass-2
+query-word tiebreak. Both wins are in
+`results/hippocampus.jsonl` (the current headline, 39/44); the
+audit trail preserves the prior states:
 
-The earlier baseline artifact, `results/hippocampus-baseline.jsonl`, had 8
-contradiction-free failures. The role-token expansion closed
-`João_Lourenço-birth_place` and
-`Mohammed_Shahabuddin-honorific_prefix`, but introduced the
-`Air_Products-num_employees` regression — net 37/44 (preserved in
-`results/hippocampus-open6.jsonl` for audit). The past-tense `succeed`
-extension closed `Bajram_Begaj-predecessor` on top of that — net
-**38/44**.
+- `results/hippocampus-pt-succeed.jsonl` (38/44) — post-§7.22, pre-§7.23.
+  Air_Products is still failing in this artifact.
+- `results/hippocampus-open6.jsonl` (37/44) — post-§7.18 (OPEN-6 phase 1),
+  pre-§7.22. Both Bajram and Air_Products are failing.
+- `results/hippocampus-baseline.jsonl` (36/44) — original canonical run
+  (`a00e8f8`), before any role-token expansion.
+
+The chain of mechanism-attributable per-fact closures is then:
+`João_Lourenço-birth_place` and `Mohammed_Shahabuddin-honorific_prefix`
+closed by §7.18; `Bajram_Begaj-predecessor` closed by §7.22;
+`Air_Products-num_employees` closed by §7.23. Net: **36 → 39** across
+three §S3-disciplined mechanism additions, with zero per-fact
+regression accumulated.
 
 ## Failure categories
 
@@ -90,13 +91,17 @@ The 4 facts are `Abdelmadjid_Tebboune-primeminister`,
 `Hamad_bin_Isa_Al_Khalifa-regent`, `Javier_Milei-office`, and
 `Vahagn_Khachaturyan-successor1`.
 
-### Role-expansion regression (1 headline fact)
+### Role-expansion regression (0 headline facts)
 
-`Air_Products-num_employees` passed in the earlier baseline artifact
-and failed in the headline artifact. With `num_employees` appended to
-the query string, ranking shifted and a stale value won. This is a
-real regression, and it is why the methodology labels the mechanism
-GREEN on net metric but YELLOW on regression safety.
+`Air_Products-num_employees` was the OPEN-6 phase 1 regression: with
+`num_employees` appended to the query string, ranking shifted and a
+stale value won. The §7.23 pt2qm mechanism (Pass-2 query-word
+tiebreak in `resolveCurrentTruth`) closes it cleanly, with zero
+per-fact regression on the other 43 facts under the new canonical
+config. The earlier state is preserved in
+`results/hippocampus-pt-succeed.jsonl` (38/44) and
+`results/hippocampus-open6.jsonl` (37/44) — both audit artifacts
+contain the failing Air_Products row.
 
 ## Derivation manifest
 
@@ -130,22 +135,18 @@ GREEN on net metric but YELLOW on regression safety.
    by the role-token expansion rather than one of the original
    baseline failure buckets.
 
-## What fixing the remaining 6 looks like
+## What fixing the remaining 5 looks like
 
 The 4 `out-of-scope` facts require either a different corpus
 selection or a mechanism that no retrieval system in this bench
 currently has.
 
-The 2 remaining Hippocampus-specific fixes are:
+The 1 remaining Hippocampus-specific fix is:
 
 - `Alexander_Van_der_Bellen-citizenship`: expand schema-cortex atom
   coverage for list-tail temporal citizenship. Also requires an
   `at_birth` temporal-operator implementation in the resolver
   (the query's temporal classifier already extracts `at_birth`,
   but the bridge precondition rejects anything other than `current`).
-- `Air_Products-num_employees`: fix the ranking path that lets the
-  role-expanded query prefer a stale employee-count cell. The
-  `--pt2qm` (Pass-2 query-word tiebreak) fix on `primitive/code-hippo/prodV1`
-  closes this in the source repo, but is not yet enabled in the
-  headline artifact in this evals repo — a separate productization
-  decision.
+  This is a real new substrate primitive with its own §S4 falsifier
+  bar, not a regex tweak.

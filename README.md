@@ -4,7 +4,7 @@
   <br>
 
   [![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-1d9e75.svg?style=flat-square)](LICENSE)
-  [![CF Accuracy](https://img.shields.io/badge/CF_Accuracy-86.36%25-1d9e75?style=flat-square)](results/summary.json)
+  [![CF Accuracy](https://img.shields.io/badge/CF_Accuracy-88.64%25-1d9e75?style=flat-square)](results/summary.json)
   [![vs MiniLM](https://img.shields.io/badge/vs_MiniLM-10×_cheaper-378add?style=flat-square)](results/summary.json)
   [![Benchmark](https://img.shields.io/badge/Benchmark-Wikipedia_44--fact-444441?style=flat-square)](data/wikipedia-44/)
   [![Data: CC BY-SA 4.0](https://img.shields.io/badge/Data-CC_BY--SA_4.0-888780?style=flat-square)](data/wikipedia-44/LICENSE)
@@ -25,13 +25,13 @@ This repository contains the public benchmark artifacts for that claim. Not the 
 
 | System | CF Accuracy | Non-list-tail CF | Tokens / answer |
 |---|---|---|---|
-| **Hippocampus** | **86.36%** | **89.47%** | **~12** |
+| **Hippocampus** | **88.64%** | **92.11%** | **~12** |
 | MiniLM-filtered | 75.00% | 86.84% | ~121 |
 | BM25 | 31.82% | 36.84% | ~495 |
 
 **CF = contradiction-free:** correct answer with no contradicting claims introduced. Stricter than top-1 accuracy — the right metric for production agents where a confident wrong answer is worse than no answer.
 
-On non-list-tail facts (the majority of any real workload) Hippocampus exceeds MiniLM-filtered at 89.47% vs 86.84% CF — at 10× lower token cost. On list-tail facts, MiniLM-filtered scores 0% (filtering discards the relevant list context). Hippocampus scores 66.67%.
+On non-list-tail facts (the majority of any real workload) Hippocampus exceeds MiniLM-filtered by 5.3 points (92.11% vs 86.84% CF) — at 10× lower token cost. On list-tail facts, MiniLM-filtered scores 0% (filtering discards the relevant list context). Hippocampus scores 66.67%.
 
 ## Reproduce the table
 
@@ -40,7 +40,7 @@ npm install
 npx tsx scripts/score.ts results/hippocampus.jsonl
 ```
 
-Expected: `38/44 overall CF (86.36%) · 34/38 non-list-tail (89.47%) · ~12 mean tokens`
+Expected: `39/44 overall CF (88.64%) · 35/38 non-list-tail (92.11%) · ~12 mean tokens`
 
 Every number is derivable from the JSONL files in `results/` using `scripts/score.ts`. The production engine is not in this repo.
 
@@ -51,9 +51,10 @@ hippocampus-evals/
 ├── data/
 │   └── wikipedia-44/        44-fact benchmark, frozen 2024-12-31 (CC BY-SA 4.0)
 ├── results/
-│   ├── hippocampus.jsonl         Headline Hippocampus results — commit hash, tokens, CF
-│   ├── hippocampus-open6.jsonl   Intermediate audit artifact (OPEN-6 phase 1, 37/44)
-│   ├── hippocampus-baseline.jsonl  Original canonical baseline (a00e8f8, 36/44)
+│   ├── hippocampus.jsonl              Headline Hippocampus results — commit hash, tokens, CF
+│   ├── hippocampus-pt-succeed.jsonl   Pre-pt2qm audit artifact (OPEN-6 + past-tense regex, 38/44)
+│   ├── hippocampus-open6.jsonl        OPEN-6 phase 1 audit artifact (37/44)
+│   ├── hippocampus-baseline.jsonl     Original canonical baseline (a00e8f8, 36/44)
 │   ├── minilm-filtered.jsonl
 │   ├── bm25.jsonl
 │   └── summary.json         Headline numbers
@@ -61,12 +62,12 @@ hippocampus-evals/
 │   └── score.ts             Reproduces summary.json from any result JSONL
 ├── BENCHMARK.md             Dataset description and scoring definition
 ├── METHODOLOGY.md           Pre-committed falsifiers in plain English
-├── FAILURES.md              The 6 facts we still get wrong, with root causes
+├── FAILURES.md              The 5 facts we still get wrong, with root causes
 ├── LIMITATIONS.md           What we are not claiming
 └── REPRODUCE.md             Full reproduction instructions
 ```
 
-## The 6 facts we still get wrong
+## The 5 facts we still get wrong
 
 We publish these because knowing which bucket a failure belongs to is more useful than a cleaner number.
 

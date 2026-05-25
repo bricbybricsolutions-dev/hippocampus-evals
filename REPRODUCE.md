@@ -54,15 +54,15 @@ Expected fields in the printed output for `Hippocampus`:
 {
   "overall": {
     "n": 44,
-    "contradiction_free": 0.8636363636363636,    // 38/44 = 86.36%
-    "mean_tokens": 12.136363636363637,            // ≈ 12.14
+    "contradiction_free": 0.8863636363636364,    // 39/44 = 88.64%
+    "mean_tokens": 12.090909090909092,            // ≈ 12.09
     "mean_units": 1,
-    "accuracy": 0.8863636363636364                // 39/44 raw answer correctness
+    "accuracy": 0.9090909090909091                // 40/44 raw answer correctness
   },
   "non_list_tail": {
     "n": 38,
-    "contradiction_free": 0.8947368421052632,    // 34/38 = 89.47%
-    "mean_tokens": 12.105263157894736
+    "contradiction_free": 0.9210526315789473,    // 35/38 = 92.11%
+    "mean_tokens": 12.052631578947368
   },
   "list_tail": {
     "n": 6,
@@ -72,17 +72,26 @@ Expected fields in the printed output for `Hippocampus`:
 }
 ```
 
+### From `results/hippocampus-pt-succeed.jsonl` (pre-pt2qm audit artifact)
+
+```
+$ npx tsx scripts/score.ts results/hippocampus-pt-succeed.jsonl
+```
+
+This is the state after §7.22 (past-tense `succeed` regex) but before
+§7.23 (pt2qm canonical promotion): 38/44 overall, 34/38 non-list-tail.
+`Air_Products-num_employees` is still failing in this artifact.
+
 ### From `results/hippocampus-open6.jsonl` (intermediate audit artifact)
 
 ```
 $ npx tsx scripts/score.ts results/hippocampus-open6.jsonl
 ```
 
-This is the OPEN-6 phase 1 result before the §7.21 past-tense `succeed`
-extension landed (37/44, 33/38 non-list-tail, mean tokens 12.18).
-Retained so readers can verify exactly which fact changed when the
-extension landed: `Bajram_Begaj-predecessor` flips from CF=0 to CF=1,
-all other 43 rows are byte-identical on scoring-relevant fields.
+This is the OPEN-6 phase 1 result, before either the §7.22 past-tense
+`succeed` extension or the §7.23 pt2qm canonical promotion (37/44 overall,
+33/38 non-list-tail). Both `Bajram_Begaj-predecessor` and
+`Air_Products-num_employees` are failing in this artifact.
 
 ### From `results/hippocampus-baseline.jsonl`
 
@@ -132,11 +141,12 @@ hippocampus-baseline, minilm-filtered, bm25) and rewrites
 `results/summary.json` in place. The resulting `summary.json` should
 be byte-identical to the one already committed to the repository
 (modulo trailing newline conventions on Windows vs POSIX). The
-`headline.hippocampus.overall_cf` field must be exactly `"38/44"`;
+`headline.hippocampus.overall_cf` field must be exactly `"39/44"`;
 the `token_efficiency.minilm_filtered_over_hippocampus` field must
-be `10.0094`. The `hippocampus-open6.jsonl` audit artifact is not
-loaded by `--write-summary` — it is scoreable individually via
-`scripts/score.ts results/hippocampus-open6.jsonl`.
+be `10.047`. The `hippocampus-pt-succeed.jsonl` and
+`hippocampus-open6.jsonl` audit artifacts are not loaded by
+`--write-summary` — they are scoreable individually via
+`scripts/score.ts results/<file>.jsonl`.
 
 ## What is *not* reproducible from this repository alone
 
