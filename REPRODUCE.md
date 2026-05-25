@@ -54,15 +54,15 @@ Expected fields in the printed output for `Hippocampus`:
 {
   "overall": {
     "n": 44,
-    "contradiction_free": 0.8863636363636364,    // 39/44 = 88.64%
-    "mean_tokens": 12.090909090909092,            // ≈ 12.09
+    "contradiction_free": 0.9090909090909091,    // 40/44 = 90.91%
+    "mean_tokens": 12.045454545454545,            // ≈ 12.05
     "mean_units": 1,
-    "accuracy": 0.9090909090909091                // 40/44 raw answer correctness
+    "accuracy": 0.9318181818181818                // 41/44 raw answer correctness
   },
   "non_list_tail": {
     "n": 38,
-    "contradiction_free": 0.9210526315789473,    // 35/38 = 92.11%
-    "mean_tokens": 12.052631578947368
+    "contradiction_free": 0.9473684210526315,    // 36/38 = 94.74%
+    "mean_tokens": 12.0
   },
   "list_tail": {
     "n": 6,
@@ -127,7 +127,7 @@ Expected headline fields:
 
 | File                       | System                  | CF (overall)        | Mean tokens |
 | -------------------------- | ----------------------- | ------------------- | ----------- |
-| `minilm-filtered.jsonl`    | `MiniLM-filtered(2024)` | 0.75 (33/44)        | 121.4773    |
+| `minilm-filtered.jsonl`    | `MiniLM-filtered(2024)` | 0.7727 (34/44)      | 120.5682    |
 | `bm25.jsonl`               | `BM25-TFIDF`            | 0.3181... (14/44)   | 495.25      |
 
 ### Rebuilding `results/summary.json`
@@ -141,10 +141,10 @@ hippocampus-baseline, minilm-filtered, bm25) and rewrites
 `results/summary.json` in place. The resulting `summary.json` should
 be byte-identical to the one already committed to the repository
 (modulo trailing newline conventions on Windows vs POSIX). The
-`headline.hippocampus.overall_cf` field must be exactly `"39/44"`;
+`headline.hippocampus.overall_cf` field must be exactly `"40/44"`;
 the `token_efficiency.minilm_filtered_over_hippocampus` field must
-be `10.047`. The `hippocampus-pt-succeed.jsonl` and
-`hippocampus-open6.jsonl` audit artifacts are not loaded by
+be `10.0094`. The `*-prebugfix.jsonl`, `hippocampus-pt-succeed.jsonl`,
+and `hippocampus-open6.jsonl` audit artifacts are not loaded by
 `--write-summary` — they are scoreable individually via
 `scripts/score.ts results/<file>.jsonl`.
 

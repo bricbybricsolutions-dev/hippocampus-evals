@@ -8,17 +8,17 @@
         "Hippocampus": {
           "overall": {
             "n": 44,
-            "accuracy": 0.9090909090909091,
-            "contradiction_free": 0.8863636363636364,
+            "accuracy": 0.9318181818181818,
+            "contradiction_free": 0.9090909090909091,
             "mean_units": 1,
-            "mean_tokens": 12.090909090909092
+            "mean_tokens": 12.045454545454545
           },
           "non_list_tail": {
             "n": 38,
-            "accuracy": 0.9210526315789473,
-            "contradiction_free": 0.9210526315789473,
+            "accuracy": 0.9473684210526315,
+            "contradiction_free": 0.9473684210526315,
             "mean_units": 1,
-            "mean_tokens": 12.052631578947368
+            "mean_tokens": 12
           },
           "list_tail": {
             "n": 6,
@@ -30,9 +30,9 @@
         }
       },
       "meta": {
-        "commit_hash": "277cbe952e7e71ca759c4add13cd0c2b81dd826a",
-        "run_timestamp": 1779750134724,
-        "config": "bridge-config=full m1-config=baseline role-token-expansion=enabled past-tense-succeed=enabled pt2qm=enabled"
+        "commit_hash": "e980e10",
+        "run_timestamp": 1779751237538,
+        "config": "bridge-config=full m1-config=baseline role-token-expansion=enabled past-tense-succeed=enabled pt2qm=enabled milei-cell-corrected=true"
       }
     },
     "hippocampus-baseline.jsonl": {
@@ -74,31 +74,31 @@
         "MiniLM-filtered(2024)": {
           "overall": {
             "n": 44,
-            "accuracy": 0.9545454545454546,
-            "contradiction_free": 0.75,
+            "accuracy": 0.9772727272727273,
+            "contradiction_free": 0.7727272727272727,
             "mean_units": 8,
-            "mean_tokens": 121.47727272727273
+            "mean_tokens": 120.56818181818181
           },
           "non_list_tail": {
             "n": 38,
-            "accuracy": 0.9473684210526315,
-            "contradiction_free": 0.868421052631579,
+            "accuracy": 0.9736842105263158,
+            "contradiction_free": 0.8947368421052632,
             "mean_units": 8,
-            "mean_tokens": 115.8157894736842
+            "mean_tokens": 114.97368421052632
           },
           "list_tail": {
             "n": 6,
             "accuracy": 1,
             "contradiction_free": 0,
             "mean_units": 8,
-            "mean_tokens": 157.33333333333334
+            "mean_tokens": 156
           }
         }
       },
       "meta": {
-        "commit_hash": "a00e8f8521c75902a5aa24ee4f892518a5b48dd4",
-        "run_timestamp": 1779577299293,
-        "config": "bridge-config=full m1-config=baseline (default)"
+        "commit_hash": "e980e10",
+        "run_timestamp": 1779751237538,
+        "config": "bridge-config=full m1-config=baseline role-token-expansion=enabled past-tense-succeed=enabled pt2qm=enabled milei-cell-corrected=true"
       }
     },
     "bm25.jsonl": {
@@ -107,17 +107,17 @@
         "BM25-TFIDF": {
           "overall": {
             "n": 44,
-            "accuracy": 0.8863636363636364,
+            "accuracy": 0.9090909090909091,
             "contradiction_free": 0.3181818181818182,
             "mean_units": 7.636363636363637,
-            "mean_tokens": 495.25
+            "mean_tokens": 495.29545454545456
           },
           "non_list_tail": {
             "n": 38,
-            "accuracy": 0.9473684210526315,
+            "accuracy": 0.9736842105263158,
             "contradiction_free": 0.3684210526315789,
             "mean_units": 7.578947368421052,
-            "mean_tokens": 494.2105263157895
+            "mean_tokens": 494.2631578947368
           },
           "list_tail": {
             "n": 6,
@@ -129,22 +129,22 @@
         }
       },
       "meta": {
-        "commit_hash": "a00e8f8521c75902a5aa24ee4f892518a5b48dd4",
-        "run_timestamp": 1779577299293,
-        "config": "bridge-config=full m1-config=baseline (default)"
+        "commit_hash": "e980e10",
+        "run_timestamp": 1779751237538,
+        "config": "bridge-config=full m1-config=baseline role-token-expansion=enabled past-tense-succeed=enabled pt2qm=enabled milei-cell-corrected=true"
       }
     }
   },
   "headline": {
     "hippocampus": {
-      "overall_cf": "39/44",
-      "overall_cf_pct": 88.64,
-      "non_list_tail_cf": "35/38",
-      "non_list_tail_cf_pct": 92.11,
+      "overall_cf": "40/44",
+      "overall_cf_pct": 90.91,
+      "non_list_tail_cf": "36/38",
+      "non_list_tail_cf_pct": 94.74,
       "list_tail_cf": "4/6",
       "list_tail_cf_pct": 66.67,
-      "mean_tokens": 12.0909,
-      "commit_hash": "277cbe952e7e71ca759c4add13cd0c2b81dd826a"
+      "mean_tokens": 12.0455,
+      "commit_hash": "e980e10"
     },
     "hippocampus_baseline": {
       "overall_cf": "36/44",
@@ -157,20 +157,20 @@
       "commit_hash": "a00e8f8521c75902a5aa24ee4f892518a5b48dd4"
     },
     "minilm_filtered_2024": {
-      "overall_cf": "33/44",
-      "overall_cf_pct": 75,
-      "mean_tokens": 121.4773
+      "overall_cf": "34/44",
+      "overall_cf_pct": 77.27,
+      "mean_tokens": 120.5682
     },
     "bm25_tfidf": {
       "overall_cf": "14/44",
       "overall_cf_pct": 31.82,
-      "mean_tokens": 495.25
+      "mean_tokens": 495.2955
     }
   },
   "token_efficiency": {
-    "minilm_filtered_over_hippocampus": 10.047,
-    "bm25_over_hippocampus": 40.9605,
-    "minilm_filtered_over_hippocampus_baseline": 10.5217
+    "minilm_filtered_over_hippocampus": 10.0094,
+    "bm25_over_hippocampus": 41.1189,
+    "minilm_filtered_over_hippocampus_baseline": 10.4429
   },
   "failure_categories": {
     "lexical-seeding-gap": "Query word does not share a token with the canonical fact_type, so the lexical encoder never seeds the right cell. Example: 'where was X born' vs cell content prefix 'X birth place...'.",

@@ -414,13 +414,14 @@
       "article_slug": "Javier_Milei",
       "fact_type": "office",
       "current_value": "President of Argentina",
-      "current_first_revision_id": 1185944365,
-      "current_first_timestamp": "2023-11-19T23:20:16Z",
+      "current_first_revision_id": 1189226708,
+      "current_first_timestamp": "2023-12-10T14:57:53Z",
       "prior_value": "National Deputy",
       "prior_last_revision_id": 1185944047,
       "prior_last_timestamp": "2023-11-19T23:17:41Z",
       "query": "What is the current office of Javier Milei?",
-      "ground_truth_current": "President of Argentina"
+      "ground_truth_current": "President of Argentina",
+      "_correction": "2026-05-26: original current_first_revision_id 1185944365 (2023-11-19, election night) pointed at a revision where Wikipedia's infobox said 'President-elect of Argentina', contradicting ground_truth_current. Re-curated to revision 1189226708 (2023-12-10T14:57:53Z, his inauguration), the first revision where the infobox field is 'President of Argentina'. See PROJECT-GUIDE.md §7.24 in the production repo for the full story."
     },
     {
       "article_slug": "Javier_Milei",

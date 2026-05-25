@@ -1,6 +1,6 @@
 # FAILURES.md
 
-The 5 facts where the headline Hippocampus run returns a
+The 4 facts where the headline Hippocampus run returns a
 non-contradiction-free answer, named individually, categorized, and
 traced back to the source artifacts.
 
@@ -10,7 +10,7 @@ report aggregate accuracy and leave the failure cases as an exercise
 for the skeptic. We do not. The failed rows are listed below by name,
 and fixing any one of them is a known piece of work with a known cost.
 
-## The 5 Hippocampus-failing facts
+## The 4 Hippocampus-failing facts
 
 These are the facts where `contradiction_free=0` in
 `results/hippocampus.jsonl`, the headline Hippocampus artifact.
@@ -18,16 +18,33 @@ These are the facts where `contradiction_free=0` in
 | # | Fact ID                                  | Failure category       | Notes |
 |---|------------------------------------------|------------------------|-------|
 | 1 | `Abdelmadjid_Tebboune-primeminister`     | `out-of-scope`         | Every tested system fails contradiction-free |
-| 2 | `Alexander_Van_der_Bellen-citizenship`   | `atom-coverage-gap`    | List-tail temporal citizenship fact (needs at-birth temporal operator) |
+| 2 | `Alexander_Van_der_Bellen-citizenship`   | `atom-coverage-gap`    | List-tail temporal citizenship fact (needs at-birth temporal operator). **The only Hippocampus-specific failure remaining.** |
 | 3 | `Hamad_bin_Isa_Al_Khalifa-regent`        | `out-of-scope`         | Every tested system fails contradiction-free |
-| 4 | `Javier_Milei-office`                    | `out-of-scope`         | Every tested system fails contradiction-free |
-| 5 | `Vahagn_Khachaturyan-successor1`         | `out-of-scope`         | Every tested system fails contradiction-free |
+| 4 | `Vahagn_Khachaturyan-successor1`         | `out-of-scope`         | Every tested system fails contradiction-free |
+
+`Javier_Milei-office` was previously on this list as a fourth
+`out-of-scope` fact. During the §7.22 / §7.23 cleanup we noticed it
+was failing identically across every tested system and audited the
+underlying cell. The cell pointed at Wikipedia revision 1185944365
+(2023-11-19, Milei's election night), where the infobox `office`
+field reads "President-elect of Argentina" — contradicting the
+declared `ground_truth_current` "President of Argentina." This was a
+phase-1 curation error in the dataset, not an engine deficit. The
+re-curated revision is 1189226708 (2023-12-10T14:57:53Z, Milei's
+inauguration), where the infobox reads "President of Argentina". A
+`_correction` field in `data/wikipedia-44/facts.json` documents the
+change inline; the full story is in PROJECT-GUIDE.md §7.24 in the
+production repo.
+
+**§S4 attribution for the 39→40 step: engine null; dataset +1.** No
+engine code changed; the headline improved because the dataset's
+ground truth for Milei was wrong and is now right.
 
 `Bajram_Begaj-predecessor` was on this list before §7.22 closed it
 via a past-tense `succeed` regex extension. `Air_Products-num_employees`
 was on this list before §7.23 closed it via the pt2qm Pass-2
 query-word tiebreak. Both wins are in
-`results/hippocampus.jsonl` (the current headline, 39/44); the
+`results/hippocampus.jsonl` (the current headline, 40/44); the
 audit trail preserves the prior states:
 
 - `results/hippocampus-pt-succeed.jsonl` (38/44) — post-§7.22, pre-§7.23.
@@ -78,7 +95,7 @@ Fixing it requires schema-cortex expansion: index more atoms during
 ingest, either through a broader static set of role-anchor patterns
 or through learned corpus-specific acquisition.
 
-### `out-of-scope` (4 headline facts)
+### `out-of-scope` (3 headline facts)
 
 A fact is `out-of-scope` if `contradiction_free=0` for every system
 tested: Hippocampus, BM25-TFIDF, MiniLM-unfiltered, and
@@ -87,9 +104,11 @@ structurally unanswerable from the 44-fact corpus as prepared. This
 is not a Hippocampus-specific deficiency; we list it here for
 honesty rather than exclude it from the denominator.
 
-The 4 facts are `Abdelmadjid_Tebboune-primeminister`,
-`Hamad_bin_Isa_Al_Khalifa-regent`, `Javier_Milei-office`, and
-`Vahagn_Khachaturyan-successor1`.
+The 3 facts are `Abdelmadjid_Tebboune-primeminister`,
+`Hamad_bin_Isa_Al_Khalifa-regent`, and
+`Vahagn_Khachaturyan-successor1`. They all share a structural shape:
+country/office → office-holder name with no atom path in the schema
+cortex.
 
 ### Role-expansion regression (0 headline facts)
 
@@ -135,9 +154,9 @@ contain the failing Air_Products row.
    by the role-token expansion rather than one of the original
    baseline failure buckets.
 
-## What fixing the remaining 5 looks like
+## What fixing the remaining 4 looks like
 
-The 4 `out-of-scope` facts require either a different corpus
+The 3 `out-of-scope` facts require either a different corpus
 selection or a mechanism that no retrieval system in this bench
 currently has.
 
